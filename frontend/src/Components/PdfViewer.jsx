@@ -105,10 +105,10 @@ const PdfViewer = ({ currPage = 1, pdfFile }) => {
               src={pageImage}
               alt={`Page ${currentPage + 1}`}
               style={{
-                width: "80%",
+                width: "100%",
                 maxHeight: "500px",
                 objectFit: "contain",
-                border: "1px solid #ccc",
+                // border: "1px solid #ccc",
               }}
             />
             <div style={{ marginTop: "10px" }}>
