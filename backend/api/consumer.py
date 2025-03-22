@@ -14,6 +14,7 @@ from .KalmanFilter import KalmanFilter
 from .utils import get_gesture, process_image, process_signLanguage
 from collections import deque
 import pickle
+import os
 
 class VideoConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -62,8 +63,8 @@ class SignLanguageConsumer(AsyncWebsocketConsumer):
         self.mp_draw = mp.solutions.drawing_utils
         self.SEQUENCE_LENGTH = 30
         self.sequence_buffer = deque(maxlen=self.SEQUENCE_LENGTH)
-        self.process_signLanguage = process_signLanguage()
-        with open('./model.pickle', 'rb') as f:
+        model_path = os.path.join(os.path.dirname(__file__), "model.pickle")
+        with open(model_path, 'rb') as f:
             self.model = pickle.load(f) 
 
     async def disconnect(self, code):
@@ -77,7 +78,7 @@ class SignLanguageConsumer(AsyncWebsocketConsumer):
             asyncio.create_task(self.process_and_send(frame_data))
             
     async def process_and_send(self, frame_data):
-        action = self.process_signLanguage(self, frame_data)
+        action = process_signLanguage(self, frame_data)
         await self.send(text_data=json.dumps({"type": "sign_language",  "action": action}))
         
 

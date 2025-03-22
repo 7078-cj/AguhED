@@ -6,6 +6,7 @@ import { FaVideo, FaAngleUp } from "react-icons/fa";
 import "../css/presentation.css";
 import Text from "../assets/text.png";
 import { useParams } from "react-router-dom";
+import SignLanguage from "../Components/SignLanguage.jsx";
 
 
 const Home = () => {
@@ -15,6 +16,7 @@ const Home = () => {
   const [processedFrame, setProcessedFrame] = useState(null);
   const [currentPage, setCurrentPage] = useState(0);
   const [pdfFile, setPdfFile] = useState(null);
+  const[Gesture,setGesture] = useState(true)
   const lastActionRef = useRef(null);
 
   useEffect(() => {
@@ -91,7 +93,7 @@ const Home = () => {
     <>
       <Navbar2 />
       {/* <div className="container"> */}
-      <main className="content">
+      {Gesture ? <main className="content">
         <div className="left-panel">
           {pdfFile ? (
             <PdfViewer pdfFile={pdfFile} currPage={currentPage} folderName={folderName} />
@@ -141,7 +143,11 @@ const Home = () => {
             )}
           </div>
         </div>
-      </main>
+      </main>:<SignLanguage/>}
+
+      <button onClick={()=>{
+        setGesture((prev)=>!prev)
+      }}>gesture button</button>
 
       {/* Footer Section */}
       <footer >

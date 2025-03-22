@@ -12,6 +12,7 @@ from PIL import Image
 from django.http import JsonResponse
 import logging
 logger = logging.getLogger(__name__)
+from django.shortcuts import get_object_or_404
 
 
 
@@ -19,6 +20,10 @@ logger = logging.getLogger(__name__)
 # CustomToken
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
+
+from .serializer import UserSerializer, UserFolderSerializer
+from django.contrib.auth.models import User
+from .models import UserFolder, Slides
 
 # Create your views here.
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -34,4 +39,51 @@ class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
     
     
+@api_view(['POST'])
+def registerUser(request):
+     if request.method == 'POST':
+        serializer = UserSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.save()
+            
+            
+            return Response({'message': 'User registered successfully'})
+        return Response(serializer.errors, status=400)
+    
+@api_view(['GET'])
+def userFolder(request,pk):
+    user = User.objects.get(id=pk)
+    userFolder = user.userFolder.all()
+    serializer = UserFolderSerializer(userFolder,many=True)
+    return Response(serializer.data)
 
+@api_view(['POST'])
+def createUserFolder(request,pk):
+        print(request.data)
+
+        try:
+            # Ensure the user exists
+            user = get_object_or_404(User, id=pk)
+
+            # Create a user folder
+            folder_name = request.data.get("folderName", "default_folder")
+            userFolder = UserFolder.objects.create(user=user, folderName=folder_name)
+
+            # Get images list correctly
+            images = request.FILES.getlist("images")
+
+            if not images:
+                return Response({"error": "No images received."}, status=400)
+
+            for slide in images:
+                Slides.objects.create(folder=userFolder, slides=slide)  # Save each image
+
+            return Response({"message": "Folder and slides created successfully!"}, status=201)
+
+        except Exception as e:
+            return Response({"error": str(e)}, status=400)
+        
+@api_view(['POST'])
+def imageToText(request,pk):
+    pass
+    

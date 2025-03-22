@@ -4,8 +4,7 @@ import "pdfjs-dist/build/pdf.worker";
 import AuthContext from "../Context/AuthContext";
 
 const PdfViewer = ({ currPage = 1, pdfFile, onPdfProcessed, folderName }) => {
-  
-  let {user} = useContext(AuthContext)
+  let { user } = useContext(AuthContext);
   const [pdfDoc, setPdfDoc] = useState(null);
   const [totalPages, setTotalPages] = useState(0);
   const [currentPage, setCurrentPage] = useState(currPage);
@@ -13,6 +12,31 @@ const PdfViewer = ({ currPage = 1, pdfFile, onPdfProcessed, folderName }) => {
   const [renderedPages, setRenderedPages] = useState({});
   const [loading, setLoading] = useState(false);
   const [uploadStatus, setUploadStatus] = useState("");
+
+  const renderPage = async (pageNum) => {
+    if (!pdfDoc || renderedPages[pageNum - 1]) return;
+  
+    setLoading(true);
+    try {
+      const page = await pdfDoc.getPage(pageNum);
+      const viewport = page.getViewport({ scale: 1.5 });
+      const canvas = document.createElement("canvas");
+      const context = canvas.getContext("2d");
+  
+      canvas.width = viewport.width;
+      canvas.height = viewport.height;
+  
+      await page.render({ canvasContext: context, viewport }).promise;
+      
+      const imgData = canvas.toDataURL("image/png");
+      setRenderedPages((prev) => ({ ...prev, [pageNum - 1]: imgData }));
+      setPageImage(imgData);
+    } catch (error) {
+      console.error("Error rendering page:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     setCurrentPage(currPage);
@@ -38,38 +62,38 @@ const PdfViewer = ({ currPage = 1, pdfFile, onPdfProcessed, folderName }) => {
     pdfjsLib.GlobalWorkerOptions.workerSrc =
       `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
 
-    let pdfData;
-    if (typeof pdfFile === "string") {
-      const response = await fetch(pdfFile);
-      pdfData = await response.arrayBuffer();
-    } else {
-      const reader = new FileReader();
-      reader.readAsArrayBuffer(pdfFile);
-      pdfData = await new Promise((resolve) => {
-        reader.onload = () => resolve(reader.result);
-      });
-    }
+    try {
+      let pdfData;
+      if (typeof pdfFile === "string") {
+        const response = await fetch(pdfFile);
+        pdfData = await response.arrayBuffer();
+      } else {
+        pdfData = await pdfFile.arrayBuffer();
+      }
 
-    const pdf = await pdfjsLib.getDocument({ data: pdfData }).promise;
-    setPdfDoc(pdf);
-    setTotalPages(pdf.numPages);
-    setCurrentPage(0);
-    setRenderedPages({});
-    
-    // Process and upload all pages at once
-    await processAllPages(pdf);
+      const pdf = await pdfjsLib.getDocument({ data: pdfData }).promise;
+      setPdfDoc(pdf);
+      setTotalPages(pdf.numPages);
+      setCurrentPage(0);
+      setRenderedPages({});
+      
+      await processAllPages(pdf);
+    } catch (error) {
+      console.error("Error loading PDF:", error);
+      setUploadStatus("Error loading PDF. Please try again.");
+    }
   };
 
   const processAllPages = async (pdf) => {
     setLoading(true);
     setUploadStatus("Processing PDF pages...");
-    
-    const totalPagesToProcess = pdf.numPages;
-    const allPageImages = [];
-    
+
     try {
-      for (let pageNum = 1; pageNum <= totalPagesToProcess; pageNum++) {
-        setUploadStatus(`Processing page ${pageNum} of ${totalPagesToProcess}...`);
+      let allPageImages = [];
+      let renderedImages = {};
+
+      for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+        setUploadStatus(`Processing page ${pageNum} of ${pdf.numPages}...`);
         
         const page = await pdf.getPage(pageNum);
         const viewport = page.getViewport({ scale: 1.5 });
@@ -80,30 +104,24 @@ const PdfViewer = ({ currPage = 1, pdfFile, onPdfProcessed, folderName }) => {
         canvas.height = viewport.height;
 
         await page.render({ canvasContext: context, viewport }).promise;
-        const imgData = canvas.toDataURL("image/png");
         
-        // Store for display
-        const pageIndex = pageNum - 1;
-        setRenderedPages((prev) => ({ ...prev, [pageIndex]: imgData }));
-        
-        // Add to array for backend upload
-        allPageImages.push({
-          pageNum: pageNum,
-          imgData: imgData
-        });
-        
-        // Set the first page as current page image
-        if (pageNum === 1) {
-          setPageImage(imgData);
-        }
+        canvas.toBlob(async (blob) => {
+          const file = new File([blob], `page_${pageNum}.png`, { type: "image/png" });
+          allPageImages.push({ pageNum, file });
+          renderedImages[pageNum - 1] = URL.createObjectURL(blob);
+
+          if (pageNum === 1) setPageImage(URL.createObjectURL(blob));
+
+          if (allPageImages.length === pdf.numPages) {
+            await uploadImagesToBackend(allPageImages);
+          }
+        }, "image/png");
       }
-      
-      // Upload all images to backend
-      await uploadImagesToBackend(allPageImages);
-      
+
+      setRenderedPages(renderedImages);
     } catch (error) {
       console.error("Error processing PDF:", error);
-      setUploadStatus("Error processing PDF: " + error.message);
+      setUploadStatus("Error processing PDF.");
     } finally {
       setLoading(false);
     }
@@ -111,79 +129,29 @@ const PdfViewer = ({ currPage = 1, pdfFile, onPdfProcessed, folderName }) => {
 
   const uploadImagesToBackend = async (pageImages) => {
     setUploadStatus("Uploading images to server...");
-    
+    const formData = new FormData();
+    formData.append("folderName", folderName || "default_folder");
+    formData.append("user", user.user_id);
+
+    pageImages.forEach(({ pageNum, file }) => {
+      formData.append("images", file, `page_${pageNum}.png`);
+    });
+
     try {
-      const response = await fetch('/api/upload-pdf-images', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          totalPages: pageImages.length,
-          images: pageImages,
-          folderName: folderName,
-          user:user.user_id
-        }),
+      const response = await fetch(`http://127.0.0.1:8000/api/createuserfolder/${user.user_id}/`, {
+        method: "POST",
+        body: formData,
       });
-      
-      if (!response.ok) {
-        throw new Error(`Server returned ${response.status}: ${response.statusText}`);
-      }
+
+      if (!response.ok) throw new Error(`Server Error: ${response.status}`);
       
       const data = await response.json();
       setUploadStatus("Upload complete!");
-      
-      // Notify parent component if callback provided
-      if (onPdfProcessed) {
-        onPdfProcessed(data);
-      }
-      
+
+      if (onPdfProcessed) onPdfProcessed(data);
     } catch (error) {
       console.error("Error uploading images:", error);
-      setUploadStatus("Error uploading images: " + error.message);
-    }
-  };
-
-  const renderPage = async (pageNum) => {
-    if (!pdfDoc) return;
-
-    setLoading(true);
-    try {
-      // Check if page is already rendered
-      if (renderedPages[currentPage]) {
-        setPageImage(renderedPages[currentPage]);
-        return;
-      }
-      
-      const page = await pdfDoc.getPage(pageNum);
-      const viewport = page.getViewport({ scale: 1.5 });
-      const canvas = document.createElement("canvas");
-      const context = canvas.getContext("2d");
-
-      canvas.width = viewport.width;
-      canvas.height = viewport.height;
-
-      await page.render({ canvasContext: context, viewport }).promise;
-      const imgData = canvas.toDataURL("image/png");
-
-      setPageImage(imgData);
-      setRenderedPages((prev) => ({ ...prev, [currentPage]: imgData }));
-    } catch (error) {
-      console.error("Error rendering page:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const goToNextPage = () => {
-    if (currentPage < totalPages - 1) {
-      setCurrentPage((prev) => prev + 1);
-    }
-  };
-
-  const goToPrevPage = () => {
-    if (currentPage > 0) {
-      setCurrentPage((prev) => prev - 1);
+      setUploadStatus("Error uploading images.");
     }
   };
 
@@ -199,59 +167,17 @@ const PdfViewer = ({ currPage = 1, pdfFile, onPdfProcessed, folderName }) => {
           {uploadStatus}
         </div>
       )}
-      
       {loading && !pageImage ? (
-        <p style={{ fontSize: "18px", fontWeight: "bold", marginTop: "20px" }}>
-          Loading...
-        </p>
+        <p style={{ fontSize: "18px", fontWeight: "bold", marginTop: "20px" }}>Loading...</p>
       ) : (
         pageImage && (
           <div>
-            <img
-              src={pageImage}
-              alt={`Page ${currentPage + 1}`}
-              style={{
-                width: "100%",
-                maxHeight: "500px",
-                objectFit: "contain",
-              }}
-            />
-            <div style={{ marginTop: "10px" }}>
-              <button
-                onClick={goToPrevPage}
-                disabled={currentPage === 0 || loading}
-                style={buttonStyle}
-              >
-                Previous
-              </button>
-              <span style={{ margin: "0 10px" }}>
-                Page {currentPage + 1} of {totalPages}
-              </span>
-              <button
-                onClick={goToNextPage}
-                disabled={currentPage === totalPages - 1 || loading}
-                style={buttonStyle}
-              >
-                Next
-              </button>
-            </div>
+            <img src={pageImage} alt={`Page ${currentPage + 1}`} style={{ width: "100%", maxHeight: "500px", objectFit: "contain" }} />
           </div>
         )
       )}
     </div>
   );
-};
-
-const buttonStyle = {
-  padding: "10px 15px",
-  margin: "5px",
-  cursor: "pointer",
-  borderRadius: "5px",
-  border: "none",
-  backgroundColor: "#007bff",
-  color: "white",
-  fontSize: "16px",
-  fontWeight: "bold",
 };
 
 export default PdfViewer;
