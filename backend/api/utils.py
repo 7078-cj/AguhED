@@ -6,6 +6,8 @@ import io
 from PIL import Image
 import fitz
 
+from collections import deque
+
 def get_gesture(landmarks):
     index_tip = landmarks[8]
     middle_tip = landmarks[12]
@@ -46,17 +48,34 @@ def get_gesture(landmarks):
 
     return "None"
 
-
-def process_image(self,frame_data):
-           
+def get_gestureSL(landmarks):
+    index_tip = landmarks[8]
+    middle_tip = landmarks[12]
+    ring_tip = landmarks[16]
+    pinky_tip = landmarks[20]
+    thumb_tip = landmarks[4]
+    index_finger_mcp = landmarks[5]
     
+
+    # Determine which fingers are extended
+    fingers = [
+        index_tip.y < landmarks[6].y,   # Index finger
+        middle_tip.y < landmarks[10].y, # Middle finger
+        ring_tip.y < landmarks[14].y,   # Ring finger
+        pinky_tip.y < landmarks[18].y,  # Pinky
+        thumb_tip.x > index_finger_mcp.x 
+    ]
+
+
+    if fingers == [0, 0, 0, 0, 0]:  
+        return "Next"  # All fingers closed
+
+
+def process_image(self, frame_data):
     frame_bytes = base64.b64decode(frame_data)
     np_arr = np.frombuffer(frame_bytes, np.uint8)
     frame = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
     frame = cv2.flip(frame, 1)  
-
-    if self.canvas is None:
-        self.canvas = np.zeros_like(frame)
 
     
     rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -67,35 +86,78 @@ def process_image(self,frame_data):
     if result.multi_hand_landmarks:
         for hand_landmarks in result.multi_hand_landmarks:
             self.mp_draw.draw_landmarks(frame, hand_landmarks, mp.solutions.hands.HAND_CONNECTIONS)
-
             
+            # Get finger position
             index_finger_tip = hand_landmarks.landmark[8]
             x, y = int(index_finger_tip.x * frame.shape[1]), int(index_finger_tip.y * frame.shape[0])
 
-           
-            smooth_x, smooth_y = self.kf.predict(x, y)
+            # Get current gesture
+            current_gesture = get_gesture(hand_landmarks.landmark)
+            print("Detected Gesture:", current_gesture)
 
-           
-            gesture = get_gesture(hand_landmarks.landmark)
-            print("Detected Gesture:", gesture)
+            # State transition logic
+            if current_gesture in ["Next", "Previous"] and self.gesture_state != current_gesture:
+                gesture = current_gesture
+                self.gesture_state = current_gesture
+            elif current_gesture != self.gesture_state:
+                self.gesture_state = current_gesture
 
-            if gesture == "Next" and self.gesture_state != "Next":
-                    gesture = "Next"
-                    self.gesture_state = "Next"  
-            elif gesture != "Next":
-                    self.gesture_state = gesture
-            elif gesture == "Previous" and self.gesture_state != "Previous":
-                    gesture = "Previous"
-                    self.gesture_state = "Previous"  
-            elif gesture != "Previous":
-                    self.gesture_state = gesture    
-                
+    return gesture
 
-
-    frame = cv2.addWeighted(frame, 0.7, self.canvas, 0.3, 0)
-   
-    _, buffer = cv2.imencode(".jpg", frame)
-    encoded_frame = base64.b64encode(buffer).decode("utf-8")
+def process_signLanguage(self, frame_data):
+    labels_dict = {
+        0: 'A', 1: 'B', 2: 'C', 3: 'D', 4: 'E', 5: 'F', 6: 'G', 7: 'H', 8: 'I', 9: 'J', 
+        10: 'K', 11: 'L', 12: 'M', 13: 'N', 14: 'O', 15: 'P', 16: 'Q', 17: 'R', 18: 'S', 
+        19: 'T', 20: 'U', 21: 'V', 22: 'W', 23: 'X', 24: 'Y', 25: 'Z',
+        26: 'Hello', 27: 'Good Bye', 28: 'I love you'
+    }
     
+    frame_bytes = base64.b64decode(frame_data)
+    np_arr = np.frombuffer(frame_bytes, np.uint8)
+    frame = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+    frame = cv2.flip(frame, 1)  
+    rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    result = self.mp_hands.process(rgb_frame)
+    
+    H, W, _ = frame.shape
+    
+    predicted_character = "none"
 
-    return encoded_frame, gesture
+    if result.multi_hand_landmarks:
+        for hand_landmarks in result.multi_hand_landmarks:
+            self.mp_draw.draw_landmarks(frame, hand_landmarks, mp.solutions.hands.HAND_CONNECTIONS)
+            
+            # Check for navigation gestures first
+            sign = get_gestureSL(hand_landmarks.landmark)
+            if sign == "Next":
+                return sign
+            
+            # Process for sign language recognition
+            x_ = []
+            y_ = []
+            data_aux = []
+            
+            # Collect coordinates
+            for landmark in hand_landmarks.landmark:
+                x_.append(landmark.x)
+                y_.append(landmark.y)
+            
+            # Normalize coordinates
+            for landmark in hand_landmarks.landmark:
+                data_aux.append(landmark.x - min(x_))
+                data_aux.append(landmark.y - min(y_))
+            
+            # Manage sequence buffer (add new, remove old if needed)
+            self.sequence_buffer.append(data_aux)
+            if len(self.sequence_buffer) > self.SEQUENCE_LENGTH:
+                self.sequence_buffer.pop(0)
+            
+            # Make prediction if we have enough frames
+            if len(self.sequence_buffer) == self.SEQUENCE_LENGTH:
+                features = np.array([data_aux])  # For static model
+                # For sequence models: features = np.array([self.sequence_buffer])
+                prediction = self.model.predict(features)[0]
+                predicted_character = labels_dict[int(prediction)]
+                print(predicted_character)
+        
+    return predicted_character

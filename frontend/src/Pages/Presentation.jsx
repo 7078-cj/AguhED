@@ -5,21 +5,23 @@ import Navbar2 from "../Components/NavBar2.jsx";
 import { FaVideo, FaAngleUp } from "react-icons/fa";
 import "../css/presentation.css";
 import Text from "../assets/text.png";
+import { useParams } from "react-router-dom";
 
 
 const Home = () => {
+  const {folderName} = useParams()
   const webcamRef = useRef(null);
-  const [ws, setWs] = useState(null);
+  const [gestureWS, setGestureWs] = useState(null);
   const [processedFrame, setProcessedFrame] = useState(null);
   const [currentPage, setCurrentPage] = useState(0);
   const [pdfFile, setPdfFile] = useState(null);
   const lastActionRef = useRef(null);
 
   useEffect(() => {
-    const socket = new WebSocket("ws://127.0.0.1:8000/ws/video");
-    setWs(socket);
+    const gestureSocket = new WebSocket("ws://127.0.0.1:8000/ws/video");
+    setGestureWs(gestureSocket);
 
-    socket.onmessage = (event) => {
+    gestureSocket.onmessage = (event) => {
       const data = JSON.parse(event.data);
 
       if (data.type === "image") {
@@ -37,19 +39,19 @@ const Home = () => {
       }
     };
 
-    socket.onerror = (error) => console.error("WebSocket Error:", error);
-    socket.onclose = () => console.log("WebSocket Closed");
+    gestureSocket.onerror = (error) => console.error("WebSocket Error:", error);
+    gestureSocket.onclose = () => console.log("WebSocket Closed");
 
     return () => {
-      socket.close();
+      gestureSocket.close();
     };
   }, [pdfFile]);
 
   const captureFrame = () => {
     if (webcamRef.current) {
       const imageSrc = webcamRef.current.getScreenshot();
-      if (ws && ws.readyState === WebSocket.OPEN) {
-        ws.send(
+      if (gestureWS && gestureWS.readyState === WebSocket.OPEN) {
+        gestureWS.send(
           JSON.stringify({ type: "image", image: imageSrc.split(",")[1] })
         );
       }
@@ -57,10 +59,10 @@ const Home = () => {
   };
 
   useEffect(() => {
-    if (!ws) return;
+    if (!gestureWS) return;
     const interval = setInterval(captureFrame, 100);
     return () => clearInterval(interval);
-  }, [ws]);
+  }, [gestureWS]);
 
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
@@ -92,7 +94,7 @@ const Home = () => {
       <main className="content">
         <div className="left-panel">
           {pdfFile ? (
-            <PdfViewer pdfFile={pdfFile} currPage={currentPage} />
+            <PdfViewer pdfFile={pdfFile} currPage={currentPage} folderName={folderName} />
           ) : (
             <p>No PDF Loaded</p>
           )}
