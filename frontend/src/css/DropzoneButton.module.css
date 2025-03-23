@@ -1,0 +1,44 @@
+.container {
+  display: flex;
+  justify-content: center; /* Centers horizontally */
+  align-items: center; /* Centers vertically */
+}
+
+.card {
+  background-color: #151435;
+  border-radius: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  width: 500px; /* Adjust width as needed */
+  padding: 50px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.dropzone {
+  border: 2px dashed #aaa; /* Dashed border */
+  border-radius: 10px;
+  width: 100%; /* Adjust width */
+  height: 300px; /* Adjust height */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: border-color 0.3s;
+  padding: 20px;
+  margin: 10px;
+
+}
+
+.dropzone:hover {
+  border-color: #000; /* Border changes on hover */
+}
+
+.control {
+  margin-top: 20px;
+}

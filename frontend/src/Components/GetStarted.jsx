@@ -1,34 +1,45 @@
 import React from "react";
-import Navbar from "../Components/Navbar";
-import { MantineProvider } from "@mantine/core";
-import grid from "../assets/grid.png";
+import { alpha, Button, Container, Title, Text } from "@mantine/core";
+import classes from "../css/HeroTitle.module.css";
+// import grid from "../assets/grid.png";
 
 function Landing() {
   return (
-    <MantineProvider>
-      <div className="home-container">
-        <div className="home-banner-container">
-          <div className="home-banner"></div>
-          <div className="home-text-section">
-            <h1 className="primary-heading">
-              Visualize Your Lessons & Interactions in a
+    <div className={classes.root}>
+      <Container size="lg">
+        <div className={classes.inner}>
+          <div className={classes.content}>
+            <h1 className={classes.title}>
+              Visualize Your Lessons & Interactions in a {" "}
+              <Text
+                component="span"
+                variant="gradient"
+                gradient={{ from: alpha("#443DFF", 1), to: "cyan" }}
+                inherit
+              >
+                Seamless Learning Experience
+              </Text>{" "}
+              .
             </h1>
-            <h1 className="primary-heading2">Seamless Learning Experience</h1>
-            <p className="primary-text">
+            <Text className={classes.description} mt={30}>
               Enhancing learning with gesture control, sign language
               translation, and AI features for a more interactive and inclusive
               experience.
-            </p>
-            <div className="secondary-button">
-              <button className="home-button">Get Started</button>
-            </div>
-          </div>
-          <div className="home-image-container">
-            <img src={grid} alt="" />
+            </Text>
+
+            <Button
+              variant="gradient"
+              gradient={{ from: alpha("#443DFF", 1), to: "cyan" }}
+              size="xl"
+              className={classes.control}
+              mt={40}
+            >
+              Get started
+            </Button>
           </div>
         </div>
-      </div>
-    </MantineProvider>
+      </Container>
+    </div>
   );
 }
 

@@ -1,47 +1,62 @@
 import React, { useState } from "react";
-import Navbar2 from "../Components/NavBar2.jsx";
-import Logo from "../assets/logo.svg";
-import "../css/home.css";
+import Navbar from "../Components/NavBar2";
+import Dropdown from "../Components/Dropdown";
+import "@mantine/core/styles.css";
+import { MantineProvider, mantineHtmlProps, Card, Text } from "@mantine/core";
 
-const Home = () => {
-  const [articles, setArticles] = useState([]);
+function Home() {
+  const [isDropdownVisible, setIsDropdownVisible] = useState(true); 
+  const [files, setFiles] = useState([]); 
 
-  const addArticle = () => {
-    const newArticle = {
-      id: Date.now(),
-      date: new Date().toLocaleDateString(),
-      title: "Untitled",
-      image:
-        "https://images.unsplash.com/photo-1482877346909-048fb6477632?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=958&q=80",
-    };
-    setArticles([...articles, newArticle]);
+  const handleFileUpload = (event) => {
+    const uploadedFiles = Array.from(event.target.files); 
+    setFiles((prevFiles) => [...prevFiles, ...uploadedFiles]); 
+    setIsDropdownVisible(false); 
   };
+
   return (
-    <div>
-      <Navbar2 />
-      <h2> DOCUMENTS</h2>
-      <div className="app-container">
-        <button className="add-article-button" onClick={addArticle}>
-          Add Document
-        </button>
-        <div className="article-list">
-          {articles.map((article) => (
-            <a
-              key={article.id}
-              href={article.link || "/present"}
-              className="article-card"
-            >
-              <div className="content">
-                <p className="date">{article.date}</p>
-                <p className="title">{article.title}</p>
-              </div>
-              <img src={article.image} alt="article-cover" />
-            </a>
-          ))}
-        </div>
-      </div>
-    </div>
+    <html lang="en" {...mantineHtmlProps}>
+      <head>
+        <meta charSet="utf-8" />
+      </head>
+      <body style={{ position: "relative", height: "100vh" }}>
+        <MantineProvider>
+          <div>
+            <Navbar />
+            {/* Show Dropdown if visible */}
+            {isDropdownVisible && (
+              <Dropdown>
+                <input
+                  type="file"
+                  onChange={handleFileUpload} 
+                  multiple 
+                  style={{ display: "block", margin: "10px 0" }}
+                />
+              </Dropdown>
+            )}
+            {/* Render a card for each uploaded file */}
+            <div style={{ padding: "20px" }}>
+              {files.map((file, index) => (
+                <Card
+                  key={index}
+                  shadow="sm"
+                  padding="lg"
+                  radius="md"
+                  withBorder
+                  style={{ marginBottom: "10px" }}
+                >
+                  <Text weight={500}>{file.name}</Text>
+                  <Text size="sm" color="dimmed">
+                    {Math.round(file.size / 1024)} KB
+                  </Text>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </MantineProvider>
+      </body>
+    </html>
   );
-};
+}
 
 export default Home;
