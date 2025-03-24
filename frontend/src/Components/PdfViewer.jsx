@@ -134,7 +134,7 @@ const PdfViewer = ({ currPage = 1, pdfFile, onPdfProcessed, folderName }) => {
     formData.append("user", user.user_id);
 
     pageImages.forEach(({ pageNum, file }) => {
-      formData.append("images", file, `page_${pageNum}.png`);
+      formData.append("images", file, `${folderName}_page_${pageNum}.png`);
     });
 
     try {
