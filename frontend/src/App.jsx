@@ -11,6 +11,7 @@ import LandingPage from './Pages/LandingPage'
 import LoginPage from './Pages/LoginPage'
 import RegisterPage from './Pages/RegisterPage'
 import Home from './Pages/Home'
+import PTest from './Pages/PTests'
 import PrivateRoutes from './Context/PrivateRoutes'
 import { CgPresentation } from 'react-icons/cg'
 
@@ -27,6 +28,7 @@ function App() {
             <Route path='/home' element={
                 <Home/>}/>
             <Route path='/' element={<LandingPage/>}/>
+            <Route path='/test' element={<PTest/>}/>
 
             <Route path='/login' element={<LoginPage/>}/>
             <Route path='/register' element={<RegisterPage/>}/>

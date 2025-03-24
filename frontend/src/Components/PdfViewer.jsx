@@ -15,19 +15,19 @@ const PdfViewer = ({ currPage = 1, pdfFile, onPdfProcessed, folderID }) => {
 
   const renderPage = async (pageNum) => {
     if (!pdfDoc || renderedPages[pageNum - 1]) return;
-  
+
     setLoading(true);
     try {
       const page = await pdfDoc.getPage(pageNum);
       const viewport = page.getViewport({ scale: 1.5 });
       const canvas = document.createElement("canvas");
       const context = canvas.getContext("2d");
-  
+
       canvas.width = viewport.width;
       canvas.height = viewport.height;
-  
+
       await page.render({ canvasContext: context, viewport }).promise;
-      
+
       const imgData = canvas.toDataURL("image/png");
       setRenderedPages((prev) => ({ ...prev, [pageNum - 1]: imgData }));
       setPageImage(imgData);
@@ -59,8 +59,7 @@ const PdfViewer = ({ currPage = 1, pdfFile, onPdfProcessed, folderID }) => {
   const handleFileChange = async (pdfFile) => {
     if (!pdfFile) return;
 
-    pdfjsLib.GlobalWorkerOptions.workerSrc =
-      `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+    pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
 
     try {
       let pdfData;
@@ -76,7 +75,7 @@ const PdfViewer = ({ currPage = 1, pdfFile, onPdfProcessed, folderID }) => {
       setTotalPages(pdf.numPages);
       setCurrentPage(0);
       setRenderedPages({});
-      
+
       await processAllPages(pdf);
     } catch (error) {
       console.error("Error loading PDF:", error);
@@ -94,7 +93,7 @@ const PdfViewer = ({ currPage = 1, pdfFile, onPdfProcessed, folderID }) => {
 
       for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
         setUploadStatus(`Processing page ${pageNum} of ${pdf.numPages}...`);
-        
+
         const page = await pdf.getPage(pageNum);
         const viewport = page.getViewport({ scale: 1.5 });
         const canvas = document.createElement("canvas");
@@ -104,9 +103,11 @@ const PdfViewer = ({ currPage = 1, pdfFile, onPdfProcessed, folderID }) => {
         canvas.height = viewport.height;
 
         await page.render({ canvasContext: context, viewport }).promise;
-        
+
         canvas.toBlob(async (blob) => {
-          const file = new File([blob], `page_${pageNum}.png`, { type: "image/png" });
+          const file = new File([blob], `page_${pageNum}.png`, {
+            type: "image/png",
+          });
           allPageImages.push({ pageNum, file });
           renderedImages[pageNum - 1] = URL.createObjectURL(blob);
 
@@ -140,13 +141,13 @@ const PdfViewer = ({ currPage = 1, pdfFile, onPdfProcessed, folderID }) => {
     });
 
     try {
-      const response = await fetch(`http://127.0.0.1:8000/api/createuserslides/${folderID}/`, {
+      const response = await fetch(`http://127.0.0.1:8000/api/createuserfolder/${user.user_id}/`, {
         method: "POST",
         body: formData,
       });
 
       if (!response.ok) throw new Error(`Server Error: ${response.status}`);
-      
+
       const data = await response.json();
       setUploadStatus("Upload complete!");
 
@@ -159,7 +160,7 @@ const PdfViewer = ({ currPage = 1, pdfFile, onPdfProcessed, folderID }) => {
 
   return (
     <div style={{ textAlign: "center", marginTop: "20px" }}>
-      {uploadStatus && (
+      {/* {uploadStatus && (
         <div style={{ 
           margin: "10px 0", 
           padding: "10px", 
@@ -172,12 +173,34 @@ const PdfViewer = ({ currPage = 1, pdfFile, onPdfProcessed, folderID }) => {
       {loading && !pageImage ? (
         <p style={{ fontSize: "18px", fontWeight: "bold", marginTop: "20px" }}>Loading...</p>
       ) : (
-        pageImage && (
-          <div>
-            <img src={pageImage} alt={`Page ${currentPage + 1}`} style={{ width: "100%", maxHeight: "500px", objectFit: "contain" }} />
-          </div>
-        )
-      )}
+        pageImage && ( */}
+      <div
+        style={{
+          flex: 3,
+          height: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          borderRadius: "8px",
+          overflow: "hidden",
+          position: "relative",
+        }}
+      >
+        <img
+          src={pageImage}
+          alt={`Page ${currentPage + 1}`}
+          style={{
+            width: "100%",
+            height: "100%",
+            objectFit: "contain",
+            display: "block",
+            maxWidth: "100%",
+            margin: "0 auto",
+          }}
+        />
+      </div>
+      {/* )
+      )} */}
     </div>
   );
 };

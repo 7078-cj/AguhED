@@ -10,16 +10,18 @@ import "@mantine/core/styles.css";
 import {
   MantineProvider,
   mantineHtmlProps,
+  ColorSchemeScript,
 } from "@mantine/core";
 
-export function LandingPage() {
+export function Landing() {
   return (
     <html lang="en" {...mantineHtmlProps}>
       <head>
         <meta charSet="utf-8" />
-\      </head>
+      </head>
       <body>
-        <MantineProvider>
+      <ColorSchemeScript defaultColorScheme="dark" />
+        <MantineProvider defaultColorScheme="dark">
           {
             <div>
               <Navbar />
@@ -37,4 +39,4 @@ export function LandingPage() {
   );
 }
 
-export default LandingPage;
+export default Landing;

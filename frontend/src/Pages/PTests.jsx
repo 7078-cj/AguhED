@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Navbar from "../Components/NavBar2";
-import Presentation from "../Components/Presentation";
+import PTESTS from "../Components/pTest";
 import "@mantine/core/styles.css";
 import {
   ColorSchemeScript,
@@ -8,6 +8,7 @@ import {
   mantineHtmlProps,
   Loader,
 } from "@mantine/core";
+
 
 function Home() {
   const [isLoading, setIsLoading] = useState(true);
@@ -45,7 +46,7 @@ function Home() {
               </div>
             ) : (
               // Main content (Presentation)
-              <Presentation />
+              <PTESTS />
             )}
           </div>
         </MantineProvider>
