@@ -3,7 +3,7 @@ import * as pdfjsLib from "pdfjs-dist";
 import "pdfjs-dist/build/pdf.worker";
 import AuthContext from "../Context/AuthContext";
 
-const PdfViewer = ({ currPage = 1, pdfFile, onPdfProcessed, folderName }) => {
+const PdfViewer = ({ currPage = 1, pdfFile, onPdfProcessed, folderID }) => {
   let { user } = useContext(AuthContext);
   const [pdfDoc, setPdfDoc] = useState(null);
   const [totalPages, setTotalPages] = useState(0);
@@ -130,15 +130,17 @@ const PdfViewer = ({ currPage = 1, pdfFile, onPdfProcessed, folderName }) => {
   const uploadImagesToBackend = async (pageImages) => {
     setUploadStatus("Uploading images to server...");
     const formData = new FormData();
-    formData.append("folderName", folderName || "default_folder");
+    formData.append("folderID", folderID || "default_folder");
     formData.append("user", user.user_id);
 
-    pageImages.forEach(({ pageNum, file }) => {
-      formData.append("images", file, `${folderName}_page_${pageNum}.png`);
+    const uniquePageImages = Array.from(new Map(pageImages.map(obj => [obj.pageNum, obj])).values());
+
+    uniquePageImages.forEach(({ pageNum, file }) => {
+        formData.append("images", file, `${folderID}_page_${pageNum}.png`);
     });
 
     try {
-      const response = await fetch(`http://127.0.0.1:8000/api/createuserfolder/${user.user_id}/`, {
+      const response = await fetch(`http://127.0.0.1:8000/api/createuserslides/${folderID}/`, {
         method: "POST",
         body: formData,
       });

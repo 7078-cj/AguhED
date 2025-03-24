@@ -10,7 +10,7 @@ import SignLanguage from "../Components/SignLanguage.jsx";
 
 
 const Home = () => {
-  const {folderName} = useParams()
+  const {folderID} = useParams()
   const webcamRef = useRef(null);
   const [gestureWS, setGestureWs] = useState(null);
   const [processedFrame, setProcessedFrame] = useState(null);
@@ -18,6 +18,7 @@ const Home = () => {
   const [pdfFile, setPdfFile] = useState(null);
   const[Gesture,setGesture] = useState(true)
   const lastActionRef = useRef(null);
+  const [text2Image, setText2Image] = useState()
 
   useEffect(() => {
     const gestureSocket = new WebSocket("ws://127.0.0.1:8000/ws/video");
@@ -71,23 +72,43 @@ const Home = () => {
     setPdfFile(file);
   };
 
-  const sendCurrentFrame = async () => {
+  const sendCurrentFrame = async (language) => {
     if (webcamRef.current) {
-      const imageSrc = webcamRef.current.getScreenshot();
-      if (imageSrc) {
-        const response = await fetch(
-          "http://127.0.0.1:8000/api/upload_frame/",
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ image: imageSrc.split(",")[1] }),
-          }
-        );
-        const result = await response.json();
-        console.log("Frame upload result:", result);
-      }
+        const imageSrc = webcamRef.current.getScreenshot();
+        if (imageSrc) {
+            // Convert Base64 to Blob
+            const byteCharacters = atob(imageSrc.split(",")[1]); // Decode Base64
+            const byteNumbers = new Array(byteCharacters.length);
+            for (let i = 0; i < byteCharacters.length; i++) {
+                byteNumbers[i] = byteCharacters.charCodeAt(i);
+            }
+            const byteArray = new Uint8Array(byteNumbers);
+            const blob = new Blob([byteArray], { type: "image/png" });
+
+            // Create FormData and append file
+            const formData = new FormData();
+            formData.append("image", blob, "snapshot.png");
+            formData.append("language", language);
+
+            // Send FormData using fetch
+            const response = await fetch("http://127.0.0.1:8000/api/upload_frame/", {
+                method: "POST",
+                body: formData, // No need for Content-Type, fetch sets it automatically
+            });
+
+            const result = await response.json();
+            setText2Image(result)
+            console.log("Frame upload result:", result);
+        } else {
+            console.error("Failed to capture image from webcam.");
+        }
+    } else {
+        console.error("Webcam reference is not available.");
     }
-  };
+};
+// ✅ Correct usage in JSX
+
+
 
   return (
     <>
@@ -96,7 +117,7 @@ const Home = () => {
       {Gesture ? <main className="content">
         <div className="left-panel">
           {pdfFile ? (
-            <PdfViewer pdfFile={pdfFile} currPage={currentPage} folderName={folderName} />
+            <PdfViewer pdfFile={pdfFile} currPage={currentPage} folderID={folderID} />
           ) : (
             <p>No PDF Loaded</p>
           )}
@@ -124,15 +145,11 @@ const Home = () => {
                 onChange={handleFileUpload}
               />
             </div>
-            <button onClick={sendCurrentFrame}>Send Current Frame</button>
+            <button onClick={() => sendCurrentFrame("tagalog")}>Send Current Frame</button>
           </div>
           <div className="bottom-right">
             <p>
-              I went through Mrs Shears’ gate, closing it behind me. I walked
-              onto her lawn and knelt beside the dog. I put my hand on the
-              muzzle of the dog. It was still warm. The dog was called
-              Wellington. It belonged to Mrs Shears who was our friend. She
-              lived on the opposite side of the road, two houses to the left.
+             {text2Image ? text2Image.Response:"none"}
             </p>
             {processedFrame && (
               <img

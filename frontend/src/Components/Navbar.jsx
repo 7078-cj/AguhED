@@ -69,7 +69,7 @@ const mockdata = [
   },
 ];
 
-function HeaderMegaMenu() {
+function Navbar() {
   const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] =
     useDisclosure(false);
   //   const [linksOpened, { toggle: toggleLinks }] = useDisclosure(false);
@@ -424,4 +424,4 @@ function HeaderMegaMenu() {
   );
 }
 
-export default HeaderMegaMenu;
+export default Navbar;

@@ -30,7 +30,7 @@ function App() {
 
             <Route path='/login' element={<LoginPage/>}/>
             <Route path='/register' element={<RegisterPage/>}/>
-            <Route path='/present' element={<Presentation/>}/>
+            <Route path='/present/:folderID' element={<Presentation/>}/>
 
           </Routes>
         </AuthProvider>

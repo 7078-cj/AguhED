@@ -5,7 +5,7 @@ from .models import Slides, UserFolder
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
        model = User
-       fields = ('id', 'username', 'email', 'password','profile')
+       fields = ('id', 'username', 'email', 'password')
        extra_kwargs = {'password': {'write_only': True}}
        
     def create(self, validated_data):
@@ -17,16 +17,17 @@ class UserSerializer(serializers.ModelSerializer):
         )
         return user
 
-class SlidesSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Slides
-        fields = '__all__'
-
 class UserFolderSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
-    folder = SlidesSerializer(read_only=True)
     
     class Meta:
         model = UserFolder
+        fields = '__all__'
+        
+
+class SlidesSerializer(serializers.ModelSerializer):
+    folder = UserFolderSerializer(read_only=True)
+    class Meta:
+        model = Slides
         fields = '__all__'
     

@@ -2,7 +2,6 @@ import React, { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import AuthContext from "../Context/AuthContext";
 import "../css/login.css";
-import LandingPage from "../pages/LandingPage";
 import Logo from "../assets/logo.svg";
 
 function Login() {

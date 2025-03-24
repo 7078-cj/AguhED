@@ -1,5 +1,5 @@
 import React from "react";
-import Navbar from "../Components/NavBar";
+import Navbar from "../Components/Navbar";
 import GetStarted from "../Components/GetStarted";
 
 import About from "../Components/About";
@@ -12,7 +12,7 @@ import {
   mantineHtmlProps,
 } from "@mantine/core";
 
-export function Landing() {
+export function LandingPage() {
   return (
     <html lang="en" {...mantineHtmlProps}>
       <head>
@@ -37,4 +37,4 @@ export function Landing() {
   );
 }
 
-export default Landing;
+export default LandingPage;
