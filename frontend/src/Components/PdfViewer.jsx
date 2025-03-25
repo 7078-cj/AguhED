@@ -192,7 +192,6 @@ const PdfViewer = ({ currPage = 1, pdfFile, onPdfProcessed, folderID }) => {
           style={{
             width: "100%",
             height: "100%",
-            objectFit: "contain",
             display: "block",
             maxWidth: "100%",
             margin: "0 auto",

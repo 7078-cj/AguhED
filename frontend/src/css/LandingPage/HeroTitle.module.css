@@ -1,0 +1,134 @@
+.root {
+  position: relative;
+  background-color: #031716;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  padding: 120px 0;
+  overflow: hidden;
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    45deg,
+    #031716 0%,
+    rgba(10, 25, 47, 0.8) 100%
+  );
+  z-index: 1;
+}
+
+.inner {
+  position: relative;
+  z-index: 2;
+}
+
+.content {
+  max-width: 800px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.title {
+  color: var(--mantine-color-white);
+  font-family: Greycliff CF, var(--mantine-font-family);
+  font-weight: 900;
+  line-height: 1.2;
+  font-size: 64px;
+  letter-spacing: -1px;
+  margin-bottom: 30px;
+
+  @media (max-width: $mantine-breakpoint-md) {
+    font-size: 48px;
+  }
+
+  @media (max-width: $mantine-breakpoint-sm) {
+    font-size: 36px;
+  }
+}
+
+.description {
+  color: var(--mantine-color-gray-2);
+  font-size: 24px;
+  line-height: 1.6;
+  margin: 0 auto;
+  max-width: 600px;
+
+  @media (max-width: $mantine-breakpoint-md) {
+    font-size: 20px;
+  }
+
+  @media (max-width: $mantine-breakpoint-sm) {
+    font-size: 18px;
+  }
+}
+
+.controls {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  margin-top: 40px;
+
+  @media (max-width: $mantine-breakpoint-sm) {
+    flex-direction: column;
+    gap: 15px;
+  }
+}
+
+.control {
+  min-width: 200px;
+  height: 56px;
+  font-size: 18px;
+  font-weight: 600;
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+  }
+
+  @media (max-width: $mantine-breakpoint-sm) {
+    width: 100%;
+  }
+}
+
+.modalContent {
+  background: linear-gradient(145deg, rgba(10, 25, 47, 0.98), rgba(16, 31, 53, 0.98));
+  backdrop-filter: blur(16px);
+  border: none;
+  border-radius: 8px;
+  box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.35);
+  width: 450px;
+  margin: 0 auto;
+}
+
+.modalContainer {
+  padding: 30px;
+}
+
+.formPaper {
+  background: rgba(16, 31, 53, 0.5);
+  padding: 30px;
+  border-radius: 8px;
+  border: none;
+  box-shadow: inset 0 2px 15px rgba(0, 0, 0, 0.15);
+}
+
+.input {
+  background: rgba(108, 165, 192, 0.06);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-size: 15px;
+  height: 45px;
+  transition: all 0.3s ease;
+  padding: 0 16px;
+
+  &:focus {
+    background: rgba(108, 165, 192, 0.1);
+    box-shadow: 0 4px 12px rgba(108, 165, 192, 0.1);
+  }
+}

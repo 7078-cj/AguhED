@@ -1,0 +1,68 @@
+.modalContent {
+    background: rgba(10, 25, 47, 0.95);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(108, 165, 192, 0.2);
+  }
+  
+  .modalContainer {
+    padding: 40px;
+  }
+  
+  .logo {
+    height: 60px;
+    width: auto;
+    margin-bottom: 20px;
+  }
+  
+  .welcomeTitle {
+    color: #6CA5C0;
+    font-size: 32px;
+    font-weight: 700;
+  }
+  
+  .formPaper {
+    background: rgba(16, 31, 53, 0.9);
+    padding: 30px;
+    border: 1px solid rgba(108, 165, 192, 0.1);
+  }
+  
+  .input {
+    background: rgba(108, 165, 192, 0.1);
+    border: 1px solid rgba(108, 165, 192, 0.2);
+    color: white;
+    transition: all 0.2s ease;
+  
+    &:focus {
+      border-color: #6CA5C0;
+    }
+  }
+  
+  .inputLabel {
+    color: #6CA5C0;
+    font-weight: 500;
+  }
+  
+  .checkboxLabel {
+    color: #6CA5C0;
+  }
+  
+  .link {
+    color: #6CA5C0;
+    transition: color 0.2s ease;
+  
+    &:hover {
+      color: #92b4c4;
+    }
+  }
+  
+  .submitButton {
+    background: linear-gradient(45deg, #34505e, #6CA5C0);
+    transition: all 0.3s ease;
+    height: 42px;
+    font-weight: 600;
+  
+    &:hover {
+      transform: translateY(-2px);
+      background: linear-gradient(45deg, #6CA5C0, #34505e);
+    }
+  }

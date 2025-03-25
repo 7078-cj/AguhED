@@ -1,0 +1,105 @@
+.wrapper {
+    padding: 120px 0;
+    background-color: #0a192f;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .wrapper::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+      linear-gradient(135deg, rgba(108, 165, 192, 0.08) 0%, transparent 50%),
+      linear-gradient(45deg, transparent 50%, rgba(52, 80, 94, 0.08) 100%);
+    pointer-events: none;
+  }
+  
+  .content {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 40px;
+  }
+  
+  .title {
+    color: var(--mantine-color-white);
+    font-family: Greycliff CF, var(--mantine-font-family);
+    font-size: clamp(36px, 5vw, 56px);
+    font-weight: 900;
+    margin-bottom: 60px;
+    background: linear-gradient(135deg, #6CA5C0, #34505e);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    position: relative;
+    letter-spacing: -0.02em;
+  }
+  
+  .title::after {
+    content: '';
+    position: absolute;
+    bottom: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100px;
+    height: 3px;
+    background: linear-gradient(90deg, #6CA5C0, #34505e);
+    border-radius: 2px;
+  }
+  
+  .description {
+    color: var(--mantine-color-gray-2);
+    font-size: clamp(18px, 2.5vw, 24px);
+    line-height: 1.8;
+    max-width: 900px;
+    margin: 0 auto;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: relative;
+  }
+  
+  .description::before,
+  .description::after {
+    content: '';
+    position: absolute;
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background: rgba(108, 165, 192, 0.05);
+    z-index: -1;
+  }
+  
+  .description::before {
+    top: -50px;
+    left: -100px;
+  }
+  
+  .description::after {
+    bottom: -50px;
+    right: -100px;
+  }
+  
+  @media (max-width: $mantine-breakpoint-sm) {
+    .wrapper {
+      padding: 80px 20px;
+    }
+  
+    .content {
+      padding: 0 20px;
+    }
+  
+    .title::after {
+      width: 80px;
+      bottom: -15px;
+    }
+  
+    .description::before,
+    .description::after {
+      width: 100px;
+      height: 100px;
+    }
+  }

@@ -4,6 +4,11 @@
   border-bottom: 1px solid light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4));
   padding-left: var(--mantine-spacing-md);
   padding-right: var(--mantine-spacing-md);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
 }
 
 .inner {
@@ -11,8 +16,16 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 16px;
 }
 
+
+.main-content {
+  padding-top: 80px; /* Same as header height */
+}
+ 
 .leftGroup {
   display: flex;
   align-items: center;

@@ -5,7 +5,7 @@ import { alpha, Button, Group, Text, useMantineTheme } from "@mantine/core";
 import { Dropzone, MIME_TYPES } from "@mantine/dropzone";
 import classes from "../css/DropzoneButton.module.css";
 
-function DropzoneButton() {
+function Dropdown() {
   const theme = useMantineTheme();
   const openRef = useRef(null);
 
@@ -62,4 +62,4 @@ function DropzoneButton() {
   );
 }
 
-export default DropzoneButton;
+export default Dropdown;

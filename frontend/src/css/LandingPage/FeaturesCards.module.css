@@ -1,0 +1,96 @@
+.wrapper {
+  padding: 120px 0;
+  background-color: #0a192f;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.wrapper::before {
+  content: '';
+  position: absolute;
+  top: -10%;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(185deg, #031716 0%, #0F8F94 100%);
+  z-index: -1;
+  transform: skewY(-6deg);
+  pointer-events: none;
+}
+
+.content {
+  position: relative;
+  z-index: 2;
+}
+
+.title {
+  color: white;
+  font-family: Greycliff CF, var(--mantine-font-family);
+  font-size: 48px;
+  font-weight: 900;
+  line-height: 1.1;
+  text-align: center;
+  margin-bottom: 40px;
+
+  @media (max-width: $mantine-breakpoint-sm) {
+    font-size: 36px;
+  }
+}
+
+.description {
+  color: var(--mantine-color-gray-2);
+  text-align: center;
+  max-width: 600px;
+  margin: 0 auto 60px;
+  font-size: 20px;
+  line-height: 1.6;
+}
+
+.card {
+  background: rgba(16, 31, 53, 0.9);
+  border: 1px solid rgba(108, 165, 192, 0.2);
+  backdrop-filter: blur(10px);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  }
+}
+
+.iconWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 80px;
+  width: 80px;
+  border-radius: 10%;
+  background: linear-gradient(45deg, #436777 0%, #062b3d 100%);
+  margin: 0 auto 20px;
+}
+
+.icon {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+
+.cardTitle {
+  color: var(--mantine-color-white);
+  font-size: 22px;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.cardDescription {
+  color: var(--mantine-color-gray-2);
+  font-size: 16px;
+  line-height: 1.6;
+  text-align: center;
+  flex-grow: 1;
+}

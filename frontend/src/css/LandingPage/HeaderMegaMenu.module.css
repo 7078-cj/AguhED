@@ -1,0 +1,155 @@
+.header {
+  height: 80px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: rgba(10, 25, 47, 0.95);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(108, 165, 192, 0.1);
+  padding: 0 clamp(20px, 5vw, 80px);
+}
+
+.logo {
+  height: 40px;
+  width: auto;
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: scale(1.05);
+  }
+}
+
+.link {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  padding: 0 20px;
+  text-decoration: none;
+  color: #6CA5C0;
+  font-weight: 500;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.bookmark {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #34505e, #6CA5C0);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translateX(-50%);
+  border-radius: 4px 4px 0 0;
+}
+
+.link:hover .bookmark {
+  width: 100%;
+}
+
+.link.active {
+  color: #92b4c4;
+}
+
+.link.active .bookmark {
+  width: 100%;
+}
+
+.loginButton {
+  position: relative;
+  color: #6CA5C0;
+  font-weight: 500;
+  padding: 8px 24px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  border: 1px solid transparent;
+
+  &:hover {
+    border-color: rgba(108, 165, 192, 0.2);
+    background: rgba(108, 165, 192, 0.05);
+    transform: translateY(-2px);
+  }
+}
+
+.signupButton {
+  padding: 8px 24px;
+  font-weight: 500;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 14px 0 rgba(108, 165, 192, 0.1);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(108, 165, 192, 0.2);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+.buttonText {
+  position: relative;
+  z-index: 1;
+}
+.burger {
+  color: #6CA5C0;
+}
+
+@media (max-width: $mantine-breakpoint-sm) {
+  .header {
+    height: 60px;
+  }
+
+  .logo {
+    height: 32px;
+  }
+
+  .link {
+    height: 42px;
+    width: 100%;
+    padding: 0 16px;
+  }
+}
+
+.modalContent {
+  background: linear-gradient(145deg, rgba(10, 25, 47, 0.98), rgba(16, 31, 53, 0.98));
+  backdrop-filter: blur(16px);
+  border: none;
+  border-radius: 8px;
+  box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.35);
+  margin: 0 auto;
+  width: 500px;
+}
+
+.modalContainer {
+  padding: 25px;
+}
+
+.formPaper {
+  background: rgba(16, 31, 53, 0.5);
+  padding: 40px;
+  border: none;
+
+}
+
+.input {
+  background: rgba(108, 165, 192, 0.06);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-size: 16px;
+  height: 48px;
+  transition: all 0.3s ease;
+  padding: 0 18px;
+
+  &:focus {
+    background: rgba(108, 165, 192, 0.1);
+    box-shadow: 0 4px 12px rgba(108, 165, 192, 0.1);
+  }
+}

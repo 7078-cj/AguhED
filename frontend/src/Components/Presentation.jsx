@@ -1,77 +1,93 @@
 import React, { useEffect, useRef, useState } from "react";
+import { useLocation } from 'react-router-dom';
+
+// Component Imports
 import Webcam from "react-webcam";
 import PdfViewer from "../Components/PdfViewer";
 import Navbar2 from "../Components/NavBar2.jsx";
 import SignLanguage from "../Components/SignLanguage.jsx";
 
-// Additional imports for Google Meet UI
-import { FaVideo, FaAngleUp } from "react-icons/fa";
+// Asset and Icon Imports
 import Text from "../assets/text.png";
-import "../css/presentation.css";
+import {
+  FaHandPaper,
+  FaExpandAlt,
+  FaClosedCaptioning,
+  FaLanguage,
+  FaTimesCircle,
+  FaSignLanguage,
+  FaFileUpload,
+  FaPowerOff,
+} from "react-icons/fa";
+
+// CSS Import
+import "../css/Presentation/Presentation.css";
+
+// Mantine Imports
+// Additional React Router Hooks
 import { useParams } from "react-router-dom";
 
-const Home = () => {
-  const {folderName} = useParams()
+const LeadGrid = () => {
+  const { folderName } = useParams();
   const webcamRef = useRef(null);
   const [gestureWS, setGestureWs] = useState(null);
   const [processedFrame, setProcessedFrame] = useState(null);
   const [currentPage, setCurrentPage] = useState(0);
   const [pdfFile, setPdfFile] = useState(null);
-  const[Gesture,setGesture] = useState(true)
+  const [Gesture, setGesture] = useState(true);
   const lastActionRef = useRef(null);
 
-    useEffect(() => {
-      const gestureSocket = new WebSocket("ws://127.0.0.1:8000/ws/video");
-      setGestureWs(gestureSocket);
+  useEffect(() => {
+    const gestureSocket = new WebSocket("ws://127.0.0.1:8000/ws/video");
+    setGestureWs(gestureSocket);
 
-      gestureSocket.onmessage = (event) => {
-        const data = JSON.parse(event.data);
+    gestureSocket.onmessage = (event) => {
+      const data = JSON.parse(event.data);
 
-        if (data.type === "image") {
-          setProcessedFrame(`data:image/jpeg;base64,${data.image}`);
+      if (data.type === "image") {
+        setProcessedFrame(`data:image/jpeg;base64,${data.image}`);
+      }
+
+      if (pdfFile && data.action && data.action !== lastActionRef.current) {
+        console.log(data.action);
+        if (data.action === "Next") {
+          setCurrentPage((prev) => prev + 1);
+        } else if (data.action === "Previous") {
+          setCurrentPage((prev) => Math.max(0, prev - 1));
         }
-
-        if (pdfFile && data.action && data.action !== lastActionRef.current) {
-          console.log(data.action);
-          if (data.action === "Next") {
-            setCurrentPage((prev) => prev + 1);
-          } else if (data.action === "Previous") {
-            setCurrentPage((prev) => Math.max(0, prev - 1));
-          }
-          lastActionRef.current = data.action;
-        }
-      };
-
-      gestureSocket.onerror = (error) =>
-        console.error("WebSocket Error:", error);
-      gestureSocket.onclose = () => console.log("WebSocket Closed");
-
-      return () => {
-        gestureSocket.close();
-      };
-    }, [pdfFile]);
-
-    const captureFrame = () => {
-      if (webcamRef.current) {
-        const imageSrc = webcamRef.current.getScreenshot();
-        if (gestureWS && gestureWS.readyState === WebSocket.OPEN) {
-          gestureWS.send(
-            JSON.stringify({ type: "image", image: imageSrc.split(",")[1] })
-          );
-        }
+        lastActionRef.current = data.action;
       }
     };
 
-    useEffect(() => {
-      if (!gestureWS) return;
-      const interval = setInterval(captureFrame, 100);
-      return () => clearInterval(interval);
-    }, [gestureWS]);
+    gestureSocket.onerror = (error) => console.error("WebSocket Error:", error);
+    gestureSocket.onclose = () => console.log("WebSocket Closed");
 
-    const handleFileUpload = (event) => {
-      const file = event.target.files[0];
-      setPdfFile(file);
+    return () => {
+      gestureSocket.close();
     };
+  }, [pdfFile]);
+
+  const captureFrame = () => {
+    if (webcamRef.current) {
+      const imageSrc = webcamRef.current.getScreenshot();
+      if (gestureWS && gestureWS.readyState === WebSocket.OPEN) {
+        gestureWS.send(
+          JSON.stringify({ type: "image", image: imageSrc.split(",")[1] })
+        );
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (!gestureWS) return;
+    const interval = setInterval(captureFrame, 100);
+    return () => clearInterval(interval);
+  }, [gestureWS]);
+
+  const handleFileUpload = (event) => {
+    const file = event.target.files[0];
+    setPdfFile(file);
+  };
 
   const sendCurrentFrame = async () => {
     if (webcamRef.current) {
@@ -91,91 +107,206 @@ const Home = () => {
     }
   };
 
-  return (
-    <>
-      <Navbar2 />
-      {/* <div className="container"> */}
-      {Gesture ? <main className="content">
-        <div className="left-panel">
-          {pdfFile ? (
-            <PdfViewer pdfFile={pdfFile} currPage={currentPage} folderName={folderName} />
-          ) : (
-            <p>No PDF Loaded</p>
-          )}
-        </div>
+  const [showCaptions, setShowCaptions] = useState(true);
+  const [mode, setMode] = useState("off");
+  const [imageToText, setImageToText] = useState(false);
+  const location = useLocation();
+  const fileId = location.state?.fileId;
+  
+  const [signLanguageTarget, setSignLanguageTarget] = useState('en');
+  const [imageTextTarget, setImageTextTarget] = useState('en');
 
-        <div className="right-panel">
-          <div>
-            <div style={{ display: "flex", justifyContent: "center" }}>
-              <Webcam
-                ref={webcamRef}
-                screenshotFormat="image/jpeg"
-                width={380}
-                height={260}
-                videoConstraints={{
-                  width: 640,
-                  height: 480,
-                  facingMode: "user",
-                }}
-              />
-            </div>
-            <div>
-              <input
-                type="file"
-                accept="application/pdf"
-                onChange={handleFileUpload}
-              />
-            </div>
-            <button onClick={sendCurrentFrame}>Send Current Frame</button>
-          </div>
-          <div className="bottom-right">
-            <p>
-              I went through Mrs Shears’ gate, closing it behind me. I walked
-              onto her lawn and knelt beside the dog. I put my hand on the
-              muzzle of the dog. It was still warm. The dog was called
-              Wellington. It belonged to Mrs Shears who was our friend. She
-              lived on the opposite side of the road, two houses to the left.
-            </p>
-            {processedFrame && (
-              <img
-                src={processedFrame}
-                alt="Processed Frame"
-                style={{ width: "100%", height: "auto" }}
-              />
+  const handleRemoveFile = () => {
+    setPdfFile(null);
+    setCurrentPage(1);
+  };
+
+  useEffect(() => {
+  if (fileId) {
+    // Simulate loading the file based on fileId
+    // Replace this with your actual file loading logic
+    const loadFile = async () => {
+      try {
+        // Temporary dummy file loading
+        const dummyPdfUrl = '/sample.pdf'; // Replace with actual file URL
+        const response = await fetch(dummyPdfUrl);
+        const blob = await response.blob();
+        setPdfFile(blob);
+        setFolderName(`Folder_${fileId}`);
+      } catch (error) {
+        console.error('Error loading file:', error);
+      }
+    };
+
+    loadFile();
+  }
+}, [fileId]);
+
+  return (
+    <div className="meet-container">
+      {/* <Navbar2 /> */}
+
+      <main className="meet-content">
+        <div className="main-video-area">
+          <div className="presentation-layout">
+            {pdfFile ? (
+              <>
+                <div className="left-panel-large">
+                  <PdfViewer
+                    pdfFile={pdfFile}
+                    currPage={currentPage}
+                    folderName={folderName}
+                  />
+                </div>
+                <div
+                  className={`right-panel-compact ${
+                    !showCaptions ? "captions-off" : ""
+                  }`}
+                >
+                  <div className="video-container-small">
+                    <Webcam
+                      ref={webcamRef}
+                      screenshotFormat="image/jpeg"
+                      width="100%"
+                      height="100%"
+                      videoConstraints={{
+                        facingMode: "user",
+                      }}
+                    />
+                    <div className="video-overlay">
+                      <div className="participant-info">
+                        <span className="participant-name">You</span>
+                        <span className="connection-status">HD</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="video-container-large">
+                <Webcam
+                  ref={webcamRef}
+                  screenshotFormat="image/jpeg"
+                  width="100%"
+                  height="100%"
+                  videoConstraints={{
+                    facingMode: "user",
+                  }}
+                />
+                <div className="video-overlay">
+                  <div className="participant-info">
+                    <span className="participant-name">You</span>
+                    <span className="connection-status">HD</span>
+                  </div>
+                </div>
+              </div>
             )}
           </div>
         </div>
-        </main>:<SignLanguage/>}
-
-      <button onClick={()=>{
-        setGesture((prev)=>!prev)
-      }}>gesture button</button>
-
-      {/* Footer Section */}
-      <footer >
-        <div className="footer-left">
-          <div className="camera-toggle">
-            <FaVideo className="camera-icon" />
-            <button><FaAngleUp className="arrow-icon" /></button>
+        <div
+          className={`captions-container ${
+            !showCaptions ? "captions-hidden" : ""
+          }`}
+        >
+          <div className="caption-content">
+            <p>Captions will appear here...</p>
           </div>
-          <div className="meet-footer">
-            <div className="footer-left">
-              <div className="camera-controls">
-                <button className="camera-button">
-                  <FaVideo size={24} />
-                </button>
-                <button className="camera-expand">
-                  <FaAngleUp size={20} />
-                </button>
-              </div>
-              {/* <button
-                className={`text-button ${showCaptions ? "active" : ""}`}
-                onClick={() => setShowCaptions(!showCaptions)}
-              >
-                <img src={Text} alt="Text" className="text-icon" />
-              </button> */}
-            </div>
+        </div>
 
+        <footer className="meet-footer">
+          <div className="footer-left"></div>
+
+          <div className="footer-center">
+            <button
+              className={`control-button ${showCaptions ? "active" : ""}`}
+              onClick={() => setShowCaptions(!showCaptions)}
+            >
+              <FaClosedCaptioning size={20} />
+              <span className="button-label">Captions</span>
+            </button>
+
+            {pdfFile ? (
+              <button
+                className="control-button active"
+                data-action="remove"
+                onClick={handleRemoveFile}
+              >
+                <FaTimesCircle size={20} />
+                <span className="button-label">Remove PDF</span>
+              </button>
+            ) : (
+              <button className="control-button">
+                <label className="file-upload-label">
+                  <input
+                    type="file"
+                    accept="application/pdf"
+                    onChange={handleFileUpload}
+                    className="file-input"
+                  />
+                  <FaFileUpload size={20} />
+                  <span className="button-label">Upload PDF</span>
+                </label>
+              </button>
+            )}
+            <button
+  className={`control-button ${imageToText ? "active" : ""}`}
+  onClick={() => {
+    setImageToText(!imageToText);
+    if (!imageToText) {
+      const imageSrc = webcamRef.current.getScreenshot();
+      // Process the image and show result in caption
+      processImage(imageSrc);
+    }
+  }}
+>
+  <FaLanguage size={20} color={imageToText ? "#81c995" : "#e8eaed"} />
+  <span className="button-label">
+    {imageToText ? "Image to Text On" : "Image to Text Off"}
+  </span>
+</button>
+            <button
+              className={`control-button ${mode !== "off" ? "active" : ""}`}
+              data-mode={mode}
+              onClick={() => {
+                if (mode === "off") {
+                  setMode("gestures");
+                  setGesture(true);
+                } else if (mode === "gestures") {
+                  setMode("signLanguage");
+                  setGesture(true);
+                } else {
+                  setMode("off");
+                  setGesture(false);
+                }
+              }}
+            >
+              {mode === "gestures" ? (
+                <>
+                  <FaHandPaper
+                    size={20}
+                    color={mode === "gestures" ? "#8ab4f8" : "#e8eaed"}
+                  />
+                  <span className="button-label">Gestures</span>
+                </>
+              ) : mode === "signLanguage" ? (
+                <>
+                  <FaSignLanguage
+                    size={20}
+                    color={mode === "signLanguage" ? "#81c995" : "#e8eaed"}
+                  />
+                  <span className="button-label">Sign Language</span>
+                </>
+              ) : (
+                <>
+                  <FaPowerOff size={20} />
+                  <span className="button-label">Detection Off</span>
+                </>
+              )}
+            </button>
+           
+          </div>
+
+          <div className="footer-right">
             <div className="time-display">
               {new Date().toLocaleString("en-US", {
                 hour: "numeric",
@@ -184,15 +315,9 @@ const Home = () => {
               })}
             </div>
           </div>
-        </div>
-      </footer>
-
-    <button onClick={()=>{
-      setGesture((prev)=>!prev)
-    }}>gesture button</button>
-  </>
+        </footer>
+      </main>
+    </div>
   );
 };
-
-export default Home;
-
+export default LeadGrid;

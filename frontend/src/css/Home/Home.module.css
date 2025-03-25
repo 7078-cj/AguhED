@@ -1,0 +1,52 @@
+
+.container {
+  background-color: #031716;
+    min-height: 100vh;
+  }
+  
+  .content {
+    padding: 40px;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding-top: 100px;
+  }
+  
+  .card {
+    background-color: #2C2E33;
+    border: 1px solid rgba(12, 149, 155, 0.2);
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(12, 149, 155, 0.15);
+    border-color: #0C959B;
+  }
+  
+  .cardHeader {
+    border-bottom: 1px solid rgba(12, 149, 155, 0.2);
+    background-color: rgba(12, 149, 155, 0.05);
+  }
+  
+  .dateText {
+    color: #0C959B;
+  }
+  
+  .fileName {
+    color: #e8eaed;
+  }
+  
+  .fileSize {
+    color: #0C959B;
+  }
+  
+  .openButton {
+    border-color: #0C959B;
+    color: #0C959B;
+  }
+  
+  .openButton:hover {
+    background-color: rgba(12, 149, 155, 0.1);
+    transform: scale(1.02);
+  }
