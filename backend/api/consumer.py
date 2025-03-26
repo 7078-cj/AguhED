@@ -23,6 +23,9 @@ class VideoConsumer(AsyncWebsocketConsumer):
         self.mp_draw = mp.solutions.drawing_utils
         self.gesture_state = "None"
         self.gesture_cooldown = 0
+        model_path = os.path.join(os.path.dirname(__file__), "Gesturemodel.pickle")
+        with open(model_path, 'rb') as f:
+            self.model = pickle.load(f) 
         
 
     async def disconnect(self, code):

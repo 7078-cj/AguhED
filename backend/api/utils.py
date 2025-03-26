@@ -8,67 +8,8 @@ import fitz
 
 from collections import deque
 
-def get_gesture(landmarks):
-    index_tip = landmarks[8]
-    middle_tip = landmarks[12]
-    ring_tip = landmarks[16]
-    pinky_tip = landmarks[20]
-    thumb_tip = landmarks[4]
-    index_finger_mcp = landmarks[5]
-    middle_finger_mcp = landmarks[9] 
-
-    # Determine which fingers are extended
-    fingers = [
-        index_tip.y < landmarks[6].y,   # Index finger
-        middle_tip.y < landmarks[10].y, # Middle finger
-        ring_tip.y < landmarks[14].y,   # Ring finger
-        pinky_tip.y < landmarks[18].y,  # Pinky
-        thumb_tip.x > index_finger_mcp.x 
-    ]
-
-    # Determine hand orientation
-    is_right_hand = thumb_tip.x > index_finger_mcp.x
-    is_right_hand_2 = thumb_tip.x > middle_finger_mcp.x
-
-   
-    dist_thumb_index = abs(index_tip.x - thumb_tip.x) * 100
-    dist_thumb_middle = abs(middle_tip.x - thumb_tip.x) * 100
-
-    # Gesture conditions
-    if fingers == [1, 1, 0, 0, 0]:  
-        return "ERASE"  # Only index & middle extended
-    elif fingers == [1, 1, 1, 0, 0]:  
-        return "ADD_SHAPE"  # Thumb, index & middle extended
-    elif fingers == [0, 0, 0, 0, 0]:  
-        return "DELETE_SHAPE"  # All fingers closed
-    elif dist_thumb_index < 1:  
-        return "Next"  # Thumb & index finger close together
-    elif dist_thumb_middle < 1:  
-        return "Previous"  # Thumb & middle finger close together
-
-    return "None"
-
-def get_gestureSL(landmarks):
-    index_tip = landmarks[8]
-    middle_tip = landmarks[12]
-    ring_tip = landmarks[16]
-    pinky_tip = landmarks[20]
-    thumb_tip = landmarks[4]
-    index_finger_mcp = landmarks[5]
-    
-
-    # Determine which fingers are extended
-    fingers = [
-        index_tip.y < landmarks[6].y,   # Index finger
-        middle_tip.y < landmarks[10].y, # Middle finger
-        ring_tip.y < landmarks[14].y,   # Ring finger
-        pinky_tip.y < landmarks[18].y,  # Pinky
-        thumb_tip.x > index_finger_mcp.x 
-    ]
 
 
-    if fingers == [0, 0, 0, 0, 0]:  
-        return "Next"  # All fingers closed
 
 
 def process_image(self, frame_data):
@@ -91,8 +32,8 @@ def process_image(self, frame_data):
             index_finger_tip = hand_landmarks.landmark[8]
             x, y = int(index_finger_tip.x * frame.shape[1]), int(index_finger_tip.y * frame.shape[0])
 
-            # Get current gesture
-            current_gesture = get_gesture(hand_landmarks.landmark)
+            # Get current gesture self.model.predict(features)[0]
+            current_gesture = self.model.predict(hand_landmarks.landmark)
             print("Detected Gesture:", current_gesture)
 
             # State transition logic
