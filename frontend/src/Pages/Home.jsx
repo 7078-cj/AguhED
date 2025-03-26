@@ -8,100 +8,33 @@ import loaderStyles from "../css/loader.module.css";
 import {
   ColorSchemeScript,
   MantineProvider,
-  mantineHtmlProps,
   Card,
   Text,
-  Group,
-  SimpleGrid,
+  Loader,
+  Container,
+  Title,
   Button,
-  Loader
+  Modal,
 } from "@mantine/core";
-import {
-  FaFilePdf,
-  FaFileWord,
-  FaFilePowerpoint,
-  FaFileAlt,
-  FaEye,
-} from "react-icons/fa";
+import CreateUserFolder from "../Components/CreateUserFolder";
+import UserFolders from "../Components/UserFolders";
+import { motion } from "framer-motion"; // Animation
 
 function Home() {
   const navigate = useNavigate();
-  const [isDropdownVisible, setIsDropdownVisible] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
-    // Simulate loading time for fetching files
+    // Simulated loading effect
     const timer = setTimeout(() => {
       setIsLoading(false);
     }, 1500);
-
     return () => clearTimeout(timer);
   }, []);
 
-  const dummyFiles = [
-    {
-      id: 1,
-      name: "Presentation_1.pdf",
-      type: "pdf",
-      size: 2621440,
-      date: "2024-01-15",
-      icon: <FaFilePdf size={24} color="#FF4136" />,
-    },
-    {
-      id: 2,
-      name: "Meeting_Notes.docx",
-      type: "doc",
-      size: 1258291,
-      date: "2024-01-14",
-      icon: <FaFileWord size={24} color="#0074D9" />,
-    },
-    {
-      id: 3,
-      name: "Project_Plan.pptx",
-      type: "ppt",
-      size: 3984710,
-      date: "2024-01-13",
-      icon: <FaFilePowerpoint size={24} color="#FF851B" />,
-    },
-    {
-      id: 4,
-      name: "Report_Q4.pdf",
-      type: "pdf",
-      size: 4299161,
-      date: "2024-01-12",
-      icon: <FaFilePdf size={24} color="#FF4136" />,
-    },
-    {
-      id: 5,
-      name: "Budget_2024.xlsx",
-      type: "excel",
-      size: 1572864,
-      date: "2024-01-11",
-      icon: <FaFileAlt size={24} color="#2ECC40" />,
-    },
-  ];
-
-  const [files, setFiles] = useState(dummyFiles);
-
-  const handleFileUpload = (event) => {
-    const uploadedFiles = Array.from(event.target.files).map((file, index) => ({
-      id: files.length + index + 1,
-      name: file.name,
-      type: file.name.split(".").pop(),
-      size: file.size,
-      date: new Date().toISOString().split("T")[0],
-      icon: <FaFileAlt size={24} color="#7FDBFF" />,
-    }));
-    setFiles((prevFiles) => [...prevFiles, ...uploadedFiles]);
-    setIsDropdownVisible(false);
-  };
-
-  const handleOpenPresentation = (fileId) => {
-    navigate("/present", { state: { fileId } });
-  };
-
   return (
-    <html lang="en" {...mantineHtmlProps}>
+    <html lang="en">
       <head>
         <meta charSet="utf-8" />
       </head>
@@ -110,81 +43,67 @@ function Home() {
         <MantineProvider defaultColorScheme="dark">
           <div className={styles.container}>
             <Navbar2 />
+
+            {/* Header Section */}
+            <Container pt={90}>
+              <Title
+                order={2}
+                align="center"
+                style={{
+                  fontWeight: 700,
+                  color: "#A0D8EF",
+                  textTransform: "uppercase",
+                  letterSpacing: "1px",
+                }}
+              >
+                Your Presentations
+              </Title>
+
+              {/* Button to open modal */}
+              <div style={{ display: "flex", justifyContent: "center", marginTop: "20px" }}>
+                <Button
+                  size="md"
+                  color="blue"
+                  onClick={() => setIsModalOpen(true)}
+                >
+                  + Create New Folder
+                </Button>
+              </div>
+            </Container>
+
+            {/* Modal for creating user folders */}
+            <Modal
+              opened={isModalOpen}
+              onClose={() => setIsModalOpen(false)}
+              title="Create a New Folder"
+              centered
+            >
+              <CreateUserFolder onClose={() => setIsModalOpen(false)} />
+            </Modal>
+
+            {/* Loading Animation */}
             {isLoading ? (
               <div className={loaderStyles.loaderContainer}>
-                <div className={loaderStyles.loaderBox}>
-                  <Loader
-                    color="rgba(0, 116, 217, 0.8)"
-                    size="xl"
-                    type="ring"
-                    mb={20}
-                    className={loaderStyles.loader}
-                  />
-                  <Text
-                    size="lg"
-                    weight={500}
-                    className={loaderStyles.title}
-                    mb={10}
-                  >
-                    Loading Your Files
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 1 }}
+                  className={loaderStyles.loaderBox}
+                >
+                  <Loader color="rgba(0, 116, 217, 0.8)" size="xl" type="ring" />
+                  <Text size="lg" weight={500} mt={15} color="#7FDBFF">
+                    Loading Your Files...
                   </Text>
-                  <Text
-                    size="sm"
-                    className={loaderStyles.subtitle}
-                  >
-                    Preparing your workspace...
-                  </Text>
-                </div>
+                </motion.div>
               </div>
             ) : (
-              <div className={styles.content}>
-                <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="xl">
-                  {files.map((file) => (
-                    <Card
-                      key={file.id}
-                      shadow="lg"
-                      padding="xl"
-                      radius="lg"
-                      className={styles.card}
-                    >
-                      <Card.Section p="xl" className={styles.cardHeader}>
-                        <Group position="apart" align="center">
-                          {file.icon}
-                          <Text size="sm" className={styles.dateText}>
-                            {file.date}
-                          </Text>
-                        </Group>
-                      </Card.Section>
-
-                      <Text
-                        weight={600}
-                        size="lg"
-                        mt="md"
-                        mb="xs"
-                        className={styles.fileName}
-                      >
-                        {file.name}
-                      </Text>
-
-                      <Text size="sm" className={styles.fileSize} mb="md">
-                        {(file.size / (1024 * 1024)).toFixed(2)} MB
-                      </Text>
-
-                      <Button
-                        variant="outline"
-                        fullWidth
-                        mt="md"
-                        radius="md"
-                        leftIcon={<FaEye size={16} />}
-                        onClick={() => handleOpenPresentation(file.id)}
-                        className={styles.openButton}
-                      >
-                        Open Presentation
-                      </Button>
-                    </Card>
-                  ))}
-                </SimpleGrid>
-              </div>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5 }}
+              >
+                <UserFolders />
+              </motion.div>
             )}
           </div>
         </MantineProvider>
@@ -194,5 +113,3 @@ function Home() {
 }
 
 export default Home;
-
-

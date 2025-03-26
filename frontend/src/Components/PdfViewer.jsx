@@ -141,7 +141,7 @@ const PdfViewer = ({ currPage = 1, pdfFile, onPdfProcessed, folderID }) => {
     });
 
     try {
-      const response = await fetch(`http://127.0.0.1:8000/api/createuserfolder/${user.user_id}/`, {
+      const response = await fetch(`http://127.0.0.1:8000/api/createuserslides/${folderID}/`, {
         method: "POST",
         body: formData,
       });

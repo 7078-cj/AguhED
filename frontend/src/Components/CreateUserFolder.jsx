@@ -1,6 +1,9 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
+import { Card, Text, TextInput, Button, Alert } from "@mantine/core";
+import AuthContext from "../Context/AuthContext";
 
-const CreateUserFolder = ({ userId }) => {
+const CreateUserFolder = () => {
+    let { user } = useContext(AuthContext);
     const [folderName, setFolderName] = useState("");
     const [message, setMessage] = useState("");
     const [loading, setLoading] = useState(false);
@@ -11,7 +14,7 @@ const CreateUserFolder = ({ userId }) => {
         setMessage("");
 
         try {
-            const response = await fetch(`http://localhost:8000/api/createuserfolder/${userId}/`, {
+            const response = await fetch(`http://localhost:8000/api/createuserfolder/${user.user_id}/`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -35,31 +38,28 @@ const CreateUserFolder = ({ userId }) => {
     };
 
     return (
-        <div className="max-w-md mx-auto bg-white p-6 rounded-xl shadow-md">
-            <h2 className="text-xl font-semibold mb-4">Create User Folder</h2>
-            {message && (
-                <p className={`p-2 text-sm rounded ${message.type === "success" ? "bg-green-200 text-green-700" : "bg-red-200 text-red-700"}`}>
-                    {message.text}
-                </p>
-            )}
-            <form onSubmit={handleSubmit} className="space-y-4">
-                <input
-                    type="text"
-                    value={folderName}
-                    onChange={(e) => setFolderName(e.target.value)}
-                    placeholder="Enter folder name"
-                    className="w-full p-2 border border-gray-300 rounded"
-                    required
-                />
-                <button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition"
-                >
-                    {loading ? "Creating..." : "Create Folder"}
-                </button>
-            </form>
-        </div>
+        <Card shadow="lg" radius="lg" padding="xl" withBorder>
+      <Text size="lg" weight={600} mb="md">
+        Create User Folder
+      </Text>
+      {message && (
+        <Alert color={message.type === "success" ? "green" : "red"} mb="md">
+          {message.text}
+        </Alert>
+      )}
+      <form onSubmit={handleSubmit}>
+        <TextInput
+          placeholder="Enter folder name"
+          value={folderName}
+          onChange={(e) => setFolderName(e.target.value)}
+          required
+          mb="md"
+        />
+        <Button type="submit" fullWidth loading={loading} color="blue">
+          {loading ? "Creating..." : "Create Folder"}
+        </Button>
+      </form>
+    </Card>
     );
 };
 

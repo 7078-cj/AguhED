@@ -1,6 +1,34 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 
-const UserFolders = ({ userId }) => {
+import AuthContext from "../Context/AuthContext";
+import { useNavigate } from "react-router-dom";
+import Navbar2 from "../Components/NavBar2";
+import "@mantine/core/styles.css";
+import styles from "../css/Home/Home.module.css";
+import loaderStyles from "../css/loader.module.css";
+
+import {
+  ColorSchemeScript,
+  MantineProvider,
+  mantineHtmlProps,
+  Card,
+  Text,
+  Group,
+  SimpleGrid,
+  Button,
+  Loader
+} from "@mantine/core";
+import {
+  FaFilePdf,
+  FaFileWord,
+  FaFilePowerpoint,
+  FaFileAlt,
+  FaEye,
+} from "react-icons/fa";
+
+const UserFolders = () => {
+    const nav = useNavigate()
+    let { user } = useContext(AuthContext);
     const [folders, setFolders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -8,7 +36,7 @@ const UserFolders = ({ userId }) => {
     useEffect(() => {
         const fetchFolders = async () => {
             try {
-                const response = await fetch(`http://localhost:8000/api/getuserallfolders/${userId}/`);
+                const response = await fetch(`http://localhost:8000/api/getuserallfolders/${user.user_id}/`);
                 if (!response.ok) {
                     throw new Error("Failed to fetch folders");
                 }
@@ -22,24 +50,68 @@ const UserFolders = ({ userId }) => {
         };
 
         fetchFolders();
-    }, [userId]);
+    }, []);
 
     return (
         <div className="max-w-3xl mx-auto p-6">
-            <h2 className="text-2xl font-bold mb-4 text-center">User Folders</h2>
+      <Text align="center" size="xl" weight={700} mb="md">
+        User Folders
+      </Text>
 
-            {loading && <p className="text-gray-500">Loading...</p>}
-            {error && <p className="text-red-500">{error}</p>}
+      {loading && (
+        <Group position="center" my="md">
+          <Loader size="lg" color="blue" />
+          <Text size="sm" color="gray">
+            Loading...
+          </Text>
+        </Group>
+      )}
+      {error && (
+        <Text align="center" color="red" size="sm">
+          {error}
+        </Text>
+      )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {folders.map((folder) => (
-                    <div key={folder.id} className="bg-white p-4 shadow-md rounded-lg border">
-                        <h3 className="text-lg font-semibold text-blue-600">{folder.folderName}</h3>
-                        <p className="text-gray-600">Folder ID: {folder.id}</p>
-                    </div>
-                ))}
-            </div>
-        </div>
+      <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
+        {folders.map((folder) => (
+          <Card
+          key={folder.id}
+          shadow="lg"
+          padding="xl"
+          radius="lg"
+          className={styles.card}
+        >
+          <Card.Section p="xl" className={styles.cardHeader}>
+            <Text
+                weight={600}
+                size="lg"
+                mt="md"
+                mb="xs"
+                className={styles.fileName}
+            >
+                {folder.folderName}
+            </Text>
+          </Card.Section>
+
+          
+
+         
+
+          <Button
+            variant="outline"
+            fullWidth
+            mt="md"
+            radius="md"
+            leftIcon={<FaEye size={16} />}
+            onClick={() =>nav(`/present/${folder.id}`)}
+            className={styles.openButton}
+          >
+            Open Presentation
+          </Button>
+        </Card>
+        ))}
+      </SimpleGrid>
+    </div>
     );
 };
 

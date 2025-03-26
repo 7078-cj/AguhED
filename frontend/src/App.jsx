@@ -14,9 +14,9 @@ function App() {
     <BrowserRouter>
       <AuthProvider>
         <Routes>
-          <Route path="/home" element={<Home />} />
+          <Route path="/home" element={<PrivateRoutes><Home /></PrivateRoutes>} />
           <Route path="/" element={<LandingPage />} />
-          <Route path="/present" element={<Presentation />} />
+          <Route path="/present/:folderID" element={<PrivateRoutes><Presentation /></PrivateRoutes>} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>

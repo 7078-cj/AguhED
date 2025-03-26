@@ -21,7 +21,7 @@ export function AuthProvider({children}) {
     const url = "http://127.0.0.1:8000/api/";
 
     const loginUser = async (e) => {
-        e.preventDefault();
+        
 
         try {
             const response = await fetch(url + 'token/', {
@@ -29,7 +29,7 @@ export function AuthProvider({children}) {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ 'username': e.target.username.value, 'password': e.target.password.value })
+                body: JSON.stringify({ 'username': e.username, 'password': e.password})
             });
 
             if (response.ok) {
@@ -38,7 +38,7 @@ export function AuthProvider({children}) {
                 setUser(jwtDecode(data.access));
                 localStorage.setItem('authTokens', JSON.stringify(data));
                 localStorage.setItem('user', JSON.stringify(jwtDecode(data.access)));
-                nav('/');
+                nav('/home');
             } else {
                 // Handle login error (e.g., show an error message)
             }

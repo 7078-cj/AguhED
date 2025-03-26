@@ -26,9 +26,10 @@ import "../css/Presentation/Presentation.css";
 // Mantine Imports
 // Additional React Router Hooks
 import { useParams } from "react-router-dom";
+import UserSlides from "./UserSlides.jsx";
 
-const LeadGrid = () => {
-  const { folderName } = useParams();
+const Presentation = () => {
+  const { folderID } = useParams();
   const webcamRef = useRef(null);
   const [gestureWS, setGestureWs] = useState(null);
   const [processedFrame, setProcessedFrame] = useState(null);
@@ -36,36 +37,41 @@ const LeadGrid = () => {
   const [pdfFile, setPdfFile] = useState(null);
   const [Gesture, setGesture] = useState(true);
   const lastActionRef = useRef(null);
+  const [hasSlides, setHasSlides] = useState(true); 
+
+  const handleSlidesCheck = (status) => {
+    setHasSlides(status);
+  };
 
   useEffect(() => {
     const gestureSocket = new WebSocket("ws://127.0.0.1:8000/ws/video");
     setGestureWs(gestureSocket);
-
+  
     gestureSocket.onmessage = (event) => {
       const data = JSON.parse(event.data);
-
+  
       if (data.type === "image") {
         setProcessedFrame(`data:image/jpeg;base64,${data.image}`);
       }
-
-      if (pdfFile && data.action && data.action !== lastActionRef.current) {
-        console.log(data.action);
-        if (data.action === "Next") {
-          setCurrentPage((prev) => prev + 1);
-        } else if (data.action === "Previous") {
-          setCurrentPage((prev) => Math.max(0, prev - 1));
+  
+      if (pdfFile || hasSlides) {  // Fix: Ensure slides/PDF exist before using gestures
+        if (data.action && data.action !== lastActionRef.current) {
+          console.log("Gesture detected:", data.action);
+          if (data.action === "Next") {
+            setCurrentPage((prev) => prev + 1);
+          } else if (data.action === "Previous") {
+            setCurrentPage((prev) => Math.max(0, prev - 1));
+          }
+          lastActionRef.current = data.action;
         }
-        lastActionRef.current = data.action;
       }
     };
-
+  
     gestureSocket.onerror = (error) => console.error("WebSocket Error:", error);
     gestureSocket.onclose = () => console.log("WebSocket Closed");
-
-    return () => {
-      gestureSocket.close();
-    };
-  }, [pdfFile]);
+  
+    return () => gestureSocket.close();
+  }, [pdfFile, hasSlides]);
 
   const captureFrame = () => {
     if (webcamRef.current) {
@@ -97,32 +103,42 @@ const LeadGrid = () => {
     setCurrentPage(0);
   };
 
-  const processImage = async (imageSrc) => {
-    if (imageSrc) {
-      try {
-        const response = await fetch(
-          "http://127.0.0.1:8000/api/upload_frame/",
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ image: imageSrc.split(",")[1] }),
-          }
-        );
-        const result = await response.json();
-        if (result.text) {
-          setImageTextCaption(result.text);
-          setShowImageTextCaption(true);
+  const processImage = async ({language}) => {
+    if (webcamRef.current) {
+      const imageSrc = webcamRef.current.getScreenshot();
+      if (imageSrc) {
+        const byteCharacters = atob(imageSrc.split(",")[1]);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
         }
-      } catch (error) {
-        console.error("Error processing image:", error);
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: "image/png" });
+
+        const formData = new FormData();
+        formData.append("image", blob, "snapshot.png");
+        formData.append("language", language);
+
+        const response = await fetch("http://127.0.0.1:8000/api/upload_frame/", {
+          method: "POST",
+          body: formData,
+        });
+
+        const result = await response.json();
+        setImageTextCaption(result.text || "No text detected");
+        setShowImageTextCaption(true);
+        setTimeout(() => setShowImageTextCaption(false), 10000);
+      } else {
+        console.error("Failed to capture image from webcam.");
       }
     }
   };
+  
 
-  const [mode, setMode] = useState("off");
+  const [mode, setMode] = useState("gestures");
   const [imageTextCaption, setImageTextCaption] = useState("");
   const [showImageTextCaption, setShowImageTextCaption] = useState(false);
-  const [showSignLanguageCaption, setShowSignLanguageCaption] = useState(false);
+  
   const location = useLocation();
   const fileId = location.state?.fileId;
 
@@ -136,70 +152,50 @@ const LeadGrid = () => {
     return () => clearTimeout(timer);
   }, [showImageTextCaption]);
 
-  useEffect(() => {
-    let timer;
-    if (showSignLanguageCaption) {
-      timer = setTimeout(() => {
-        setShowSignLanguageCaption(false);
-      }, 10000);
-    }
-    return () => clearTimeout(timer);
-  }, [showSignLanguageCaption]);
-
-
-
-  const handleRemoveFile = () => {
-    setPdfFile(null);
-    setCurrentPage(1);
-  };
-
-  useEffect(() => {
-    if (fileId) {
-
-      const loadFile = async () => {
-        try {
-          // Temporary dummy file loading
-          const dummyPdfUrl = "/sample.pdf"; // Replace with actual file URL
-          const response = await fetch(dummyPdfUrl);
-          const blob = await response.blob();
-          setPdfFile(blob);
-          setFolderName(`Folder_${fileId}`);
-        } catch (error) {
-          console.error("Error loading file:", error);
-        }
-      };
-
-      loadFile();
-    }
-  }, [fileId]);
 
   return (
     <div className="meet-container">
       {/* <Navbar2 /> */}
 
       <main className="meet-content">
-        <div className="main-video-area">
-          <div className="presentation-layout">
-            {pdfFile ? (
+        
+        {mode == "gestures" ? <div className="main-video-area">
+          <div className="presentation-layout flex flex-row justify-center">
+           
               <>
-                <div className="left-panel-large">
-                  <PdfViewer
-                    pdfFile={pdfFile}
-                    currPage={currentPage}
-                    folderName={folderName}
+              {hasSlides ? (
+                  <UserSlides 
+                    onSlidesCheck={handleSlidesCheck} 
+                    currPage={currentPage} 
+                    folderID={folderID} 
                   />
-                </div>
+                ) : pdfFile ? (
+                  <div className="left-panel-large">
+                    <PdfViewer 
+                      pdfFile={pdfFile} 
+                      currPage={currentPage} 
+                      folderID={folderID} 
+                    />
+                  </div>
+                ) : (
+                  <></>
+                )}
+
+
                 <div className="right-panel-compact">
                   <div className="video-container-small">
                     <Webcam
-                      ref={webcamRef}
-                      screenshotFormat="image/jpeg"
-                      width="100%"
-                      height="100%"
-                      videoConstraints={{
-                        facingMode: "user",
-                      }}
-                    />
+                                            ref={webcamRef}
+                                            screenshotFormat="image/jpeg"
+                                            width={380}
+                                            height={260}
+                                            videoConstraints={{
+                                              width: 320,
+                                              height: 240,
+                                              facingMode: "user",
+                                            }}
+                                          />
+                    
                     <div className="video-overlay">
                       <div className="participant-info">
                         <span className="participant-name">You</span>
@@ -209,27 +205,8 @@ const LeadGrid = () => {
                   </div>
                 </div>
               </>
-            ) : (
-              <div className="video-container-large">
-                <Webcam
-                  ref={webcamRef}
-                  screenshotFormat="image/jpeg"
-                  width="100%"
-                  height="100%"
-                  videoConstraints={{
-                    facingMode: "user",
-                  }}
-                />
-                <div className="video-overlay">
-                  <div className="participant-info">
-                    <span className="participant-name">You</span>
-                    <span className="connection-status">HD</span>
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
-        </div>
+        </div>:<div><SignLanguage/></div>}
 
         {showImageTextCaption && (
           <div className="captions-container">
@@ -240,15 +217,7 @@ const LeadGrid = () => {
           </div>
         )}
 
-        {mode === "signLanguage" && (
-          <div
-            className={`captions-container ${!showSignLanguageCaption ? "captions-hidden" : ""}`}
-          >
-            <div className="caption-content">
-              <p>Sign language captions will appear here...</p>
-            </div>
-          </div>
-        )}
+       
 
         <footer className="meet-footer">
           <div className="footer-left">
@@ -259,18 +228,9 @@ const LeadGrid = () => {
             <div className="control-buttons-group">
 
 
-              {pdfFile ? (
-                <button
-                  className="control-button active"
-                  data-action="remove"
-                  onClick={handleRemoveFile}
-                  title="Remove PDF"
-                >
-                  <FaTimesCircle size={20} />
-                  <span className="button-label">Remove PDF</span>
-                </button>
-              ) : (
-                <button className="control-button" title="Upload PDF">
+             {/* add check if theres a pdf in db */}
+
+                {!hasSlides ? <button className="control-button" title="Upload PDF">
                   <label className="file-upload-label">
                     <input
                       type="file"
@@ -281,15 +241,15 @@ const LeadGrid = () => {
                     <FaFileUpload size={20} />
                     <span className="button-label">Upload PDF</span>
                   </label>
-                </button>
-              )}
+                </button>:<></>}
+              
 
               <button
                 className={`control-button ${showImageTextCaption ? "active" : ""}`}
                 onClick={() => {
                   if (webcamRef.current) {
-                    const imageSrc = webcamRef.current.getScreenshot();
-                    processImage(imageSrc);
+                    
+                    processImage("tagalog");
                     setShowImageTextCaption(true);
                     setTimeout(() => {
                       setShowImageTextCaption(false);
@@ -306,16 +266,16 @@ const LeadGrid = () => {
                 className={`control-button ${mode !== "off" ? "active" : ""}`}
                 data-mode={mode}
                 onClick={() => {
-                  if (mode === "off") {
+                  if (mode === "gestures") {
+                    setMode("signLanguage");
+                    setGesture(false);
+                  } else if (mode === "signLanguage") {
                     setMode("gestures");
                     setGesture(true);
-                  } else if (mode === "gestures") {
-                    setMode("signLanguage");
-                    setGesture(true);
-                    setShowSignLanguageCaption(true);
+                    
                   } else {
-                    setMode("off");
-                    setGesture(false);
+                    setMode("gestures");
+                    setGesture(true);
                   }
                 }}
                 title="Detection Mode"
@@ -362,4 +322,4 @@ const LeadGrid = () => {
     </div>
   );
 };
-export default LeadGrid;
+export default Presentation;

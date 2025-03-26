@@ -122,6 +122,7 @@ def process_signLanguage(self, frame_data):
         frame_bytes = base64.b64decode(frame_data)
         np_arr = np.frombuffer(frame_bytes, np.uint8)
         frame = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+        
     except Exception as e:
         print(f"Error decoding frame: {e}")
         return "error"
