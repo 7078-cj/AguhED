@@ -1,13 +1,17 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
-import { FaSearch, FaUser, FaCog, FaSignOutAlt } from "react-icons/fa";
+import { FaSearch, FaUser, FaCog, FaSignOutAlt, FaHome, FaDesktop, FaQuestionCircle, FaComments, FaGlobe } from "react-icons/fa";
 import styles from "../css/Navbar2.module.css";
 import Logo from "../assets/logo.svg";
+import { FeedbackModal, HelpSupportModal, LanguageModal } from "./Modals";
 
 const Navbar = () => {
   const location = useLocation();
   const [showDropdown, setShowDropdown] = useState(false);
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+  const [showHelpModal, setShowHelpModal] = useState(false);
+  const [showLanguageModal, setShowLanguageModal] = useState(false);
 
   return (
     <nav className={styles.navbar}>
@@ -42,8 +46,9 @@ const Navbar = () => {
               damping: 20,
               duration: 0.3,
             }}
+            style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}
           >
-            Home
+            <FaHome /> Home
           </motion.span>
         </Link>
         <Link
@@ -64,8 +69,9 @@ const Navbar = () => {
               damping: 20,
               duration: 0.3,
             }}
+            style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}
           >
-            Presentation
+            <FaDesktop /> Presentation
           </motion.span>
         </Link>
       </div>
@@ -80,12 +86,42 @@ const Navbar = () => {
           </div>
           {showDropdown && (
             <div className={styles.dropdown}>
-              <button className={styles.dropdownItem}>
+              <Link to="/profile" className={styles.dropdownItem}>
                 <FaUser /> Profile
-              </button>
-              <button className={styles.dropdownItem}>
+              </Link>
+              <Link to="/settings" className={styles.dropdownItem}>
                 <FaCog /> Settings
+              </Link>
+              <div className={styles.dropdownDivider} />
+              <button
+                className={styles.dropdownItem}
+                onClick={() => {
+                  setShowHelpModal(true);
+                  setShowDropdown(false);
+                }}
+              >
+                <FaQuestionCircle /> Help & Support
               </button>
+              <button
+                className={styles.dropdownItem}
+                onClick={() => {
+                  setShowFeedbackModal(true);
+                  setShowDropdown(false);
+                }}
+              >
+                <FaComments /> Give Feedback
+              </button>
+              <div className={styles.dropdownDivider} />
+              <button
+                className={styles.dropdownItem}
+                onClick={() => {
+                  setShowLanguageModal(true);
+                  setShowDropdown(false);
+                }}
+              >
+                <FaGlobe /> Language
+              </button>
+              <div className={styles.dropdownDivider} />
               <button className={styles.dropdownItem}>
                 <FaSignOutAlt /> Logout
               </button>
@@ -93,6 +129,19 @@ const Navbar = () => {
           )}
         </div>
       </div>
+
+      <FeedbackModal
+        isOpen={showFeedbackModal}
+        onClose={() => setShowFeedbackModal(false)}
+      />
+      <HelpSupportModal
+        isOpen={showHelpModal}
+        onClose={() => setShowHelpModal(false)}
+      />
+      <LanguageModal
+        isOpen={showLanguageModal}
+        onClose={() => setShowLanguageModal(false)}
+      />
     </nav>
   );
 };

@@ -2,11 +2,13 @@ import React, { useState, useEffect } from "react";
 import Navbar from "../Components/NavBar2";
 import Presentation from "../Components/Presentation";
 import "@mantine/core/styles.css";
+import styles from "../css/loader.module.css";
 import {
   ColorSchemeScript,
   MantineProvider,
   mantineHtmlProps,
   Loader,
+  Text,
 } from "@mantine/core";
 
 function Home() {
@@ -33,19 +35,37 @@ function Home() {
           <Navbar />
 
             {isLoading ? (
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  height: "calc(100vh - 150px)", 
-                }}
-              >
-                <Loader color="blue" size="xl" type="bars" />
+              <div className={styles.loaderContainer}>
+                <div className={styles.loaderBox}>
+                  <Loader
+                    color="rgba(0, 116, 217, 0.8)"
+                    size="xl"
+                    type="ring"
+                    mb={20}
+                    className={styles.loader}
+                  />
+                  <Text
+                    size="lg"
+                    weight={500}
+                    className={styles.title}
+                    mb={10}
+                  >
+                    Preparing Your Presentation
+                  </Text>
+                  <Text
+                    size="sm"
+                    className={styles.subtitle}
+                  >
+                    Just a moment while we set everything up...
+                  </Text>
+                </div>
               </div>
             ) : (
               // Main content (Presentation)
-              <Presentation />
+              <>
+                <Presentation />
+              </>
+
             )}
           </div>
         </MantineProvider>
@@ -55,3 +75,4 @@ function Home() {
 }
 
 export default Home;
+

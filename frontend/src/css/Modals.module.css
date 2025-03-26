@@ -1,0 +1,191 @@
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1100;
+}
+
+.modalContent {
+  background: rgba(44, 44, 44, 0.95);
+  border-radius: 16px;
+  padding: 2rem;
+  width: 90%;
+  max-width: 500px;
+  position: relative;
+  border: 1px solid rgba(12, 149, 155, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.closeButton {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  color: #e8eaed;
+  cursor: pointer;
+  padding: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.closeButton:hover {
+  color: #0c959b;
+  transform: scale(1.1);
+}
+
+.modalContent h2 {
+  color: #e8eaed;
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.formGroup {
+  margin-bottom: 1.5rem;
+}
+
+.formGroup label {
+  display: block;
+  color: #e8eaed;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.formGroup select,
+.formGroup textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border-radius: 8px;
+  border: 1px solid rgba(12, 149, 155, 0.3);
+  background: rgba(255, 255, 255, 0.05);
+  color: #e8eaed;
+  font-size: 0.9rem;
+}
+
+.formGroup select:focus,
+.formGroup textarea:focus {
+  outline: none;
+  border-color: #0c959b;
+  box-shadow: 0 0 0 2px rgba(12, 149, 155, 0.2);
+}
+
+.starRating {
+  display: flex;
+  gap: 0.5rem;
+  color: #666;
+}
+
+.star {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.star:hover,
+.star.active {
+  color: #0c959b;
+  transform: scale(1.2);
+}
+
+.submitButton {
+  width: 100%;
+  padding: 0.75rem;
+  border-radius: 8px;
+  border: none;
+  background: #0c959b;
+  color: #fff;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.submitButton:hover {
+  background: #0a7f84;
+  transform: scale(1.02);
+}
+
+.helpContent {
+  color: #e8eaed;
+}
+
+.faqSection {
+  margin-bottom: 2rem;
+}
+
+.faqItem {
+  margin-bottom: 1.5rem;
+}
+
+.faqItem h4 {
+  color: #0c959b;
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+}
+
+.faqItem p {
+  color: #e8eaed;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.contactSection {
+  text-align: center;
+}
+
+.supportLink {
+  color: #0c959b;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.supportLink:hover {
+  color: #0a7f84;
+  text-decoration: underline;
+}
+
+.languageGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.languageButton {
+  padding: 0.75rem;
+  border-radius: 8px;
+  border: 1px solid rgba(12, 149, 155, 0.3);
+  background: rgba(255, 255, 255, 0.05);
+  color: #e8eaed;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.languageButton:hover {
+  background: rgba(12, 149, 155, 0.1);
+  border-color: #0c959b;
+  transform: scale(1.05);
+}
+
+.globeIcon {
+  margin-right: 0.5rem;
+}
+
+@media (max-width: 640px) {
+  .modalContent {
+    padding: 1.5rem;
+    width: 95%;
+  }
+
+  .languageGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
