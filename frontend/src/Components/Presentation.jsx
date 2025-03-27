@@ -43,6 +43,10 @@ const Presentation = () => {
     setHasSlides(status);
   };
 
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+  };
+
   useEffect(() => {
     const gestureSocket = new WebSocket("ws://127.0.0.1:8000/ws/video");
     setGestureWs(gestureSocket);
@@ -168,6 +172,7 @@ const Presentation = () => {
                     onSlidesCheck={handleSlidesCheck} 
                     currPage={currentPage} 
                     folderID={folderID} 
+                    onPageChange={handlePageChange}
                   />
                 ) : pdfFile ? (
                   <div className="left-panel-large">
@@ -175,6 +180,7 @@ const Presentation = () => {
                       pdfFile={pdfFile} 
                       currPage={currentPage} 
                       folderID={folderID} 
+                      
                     />
                   </div>
                 ) : (

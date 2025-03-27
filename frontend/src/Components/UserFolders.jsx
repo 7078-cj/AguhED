@@ -6,6 +6,8 @@ import Navbar2 from "../Components/NavBar2";
 import "@mantine/core/styles.css";
 import styles from "../css/Home/Home.module.css";
 import loaderStyles from "../css/loader.module.css";
+import { IconTrash } from '@tabler/icons-react';
+
 
 import {
   ColorSchemeScript,
@@ -16,7 +18,8 @@ import {
   Group,
   SimpleGrid,
   Button,
-  Loader
+  Loader,
+  ActionIcon
 } from "@mantine/core";
 import {
   FaFilePdf,
@@ -25,6 +28,8 @@ import {
   FaFileAlt,
   FaEye,
 } from "react-icons/fa";
+
+
 
 const UserFolders = () => {
     const nav = useNavigate()
@@ -51,6 +56,34 @@ const UserFolders = () => {
 
         fetchFolders();
     }, []);
+
+    const handleDelete = async (folderId) => {
+      const apiUrl = `http://localhost:8000/api/deleteuserfolder/${folderId}/`;
+    
+      try {
+        const response = await fetch(apiUrl, {
+          method: "DELETE",
+        });
+    
+        if (!response.ok) {
+          throw new Error("Failed to delete folder");
+        }
+    
+      
+    
+        // Optionally, update state to remove folder from UI
+        setFolders((prevFolders) => prevFolders.filter(folder => folder.id !== folderId));
+      } catch (error) {
+        console.error("Error deleting folder:", error);
+    
+        // Show error notification
+        showNotification({
+          title: "Error",
+          message: "Failed to delete folder",
+          color: "red",
+        });
+      }
+    };
 
     return (
         <div className="max-w-3xl mx-auto p-6">
@@ -81,29 +114,38 @@ const UserFolders = () => {
           radius="lg"
           className={styles.card}
         >
+          {/* Card Header Section */}
           <Card.Section p="xl" className={styles.cardHeader}>
-            <Text
+            <div className={styles.headerContent}>
+              <Text
                 weight={600}
                 size="lg"
                 mt="md"
                 mb="xs"
                 className={styles.fileName}
-            >
+              >
                 {folder.folderName}
-            </Text>
+              </Text>
+        
+              {/* Delete Button */}
+              <ActionIcon
+                color="red"
+                variant="light"
+                onClick={() => handleDelete(folder.id)}
+              >
+                <IconTrash size={20} />
+              </ActionIcon>
+            </div>
           </Card.Section>
-
-          
-
-         
-
+        
+          {/* Open Presentation Button */}
           <Button
             variant="outline"
             fullWidth
             mt="md"
             radius="md"
             leftIcon={<FaEye size={16} />}
-            onClick={() =>nav(`/present/${folder.id}`)}
+            onClick={() => nav(`/present/${folder.id}`)}
             className={styles.openButton}
           >
             Open Presentation

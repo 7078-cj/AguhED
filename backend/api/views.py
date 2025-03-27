@@ -93,24 +93,29 @@ def createUserFolder(request,pk):
             return Response({"error": str(e)}, status=400)
         
 @api_view(['POST'])
-def createUserSlides(request,pk):
-        try:
+def createUserSlides(request, pk):
+    try:
+        userFolder = UserFolder.objects.get(id=pk)
+        images = request.FILES.getlist("images")
+        print(images)
+
+        if not images:
+            return Response({"error": "No images received."}, status=400)
+
+        slides_to_create = []
+        for slide in images:
             
-            userFolder = UserFolder.objects.get(id=pk)
+            if not Slides.objects.filter(folder=userFolder, slides=slide.name).exists():
+                slides_to_create.append(Slides(folder=userFolder, slides=slide))
 
-            
-            images = request.FILES.getlist("images")
+        if slides_to_create:
+            Slides.objects.bulk_create(slides_to_create)
+            return Response({"message": "Slides created successfully!"}, status=201)
+        else:
+            return Response({"message": "No new slides to add."}, status=200)
 
-            if not images:
-                return Response({"error": "No images received."}, status=400)
-
-            slides_to_create = [Slides(folder=userFolder, slides=slide) for slide in images]
-            Slides.objects.bulk_create(slides_to_create) 
-
-            return Response({"message": "Folder and slides created successfully!"}, status=201)
-
-        except Exception as e:
-            return Response({"error": str(e)}, status=400)
+    except Exception as e:
+        return Response({"error": str(e)}, status=400)
     
         
 @api_view(["POST"])
@@ -136,4 +141,10 @@ def imageToText(request):
     ])
 
     return Response({"Response": response.text})
+
+@api_view(["DELETE"])
+def delete_folder(request, pk):
+    folder = get_object_or_404(UserFolder, id=pk) 
+    folder.delete()
+    return Response({"message": "Folder deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
     

@@ -13,31 +13,6 @@ const PdfViewer = ({ currPage = 1, pdfFile, onPdfProcessed, folderID }) => {
   const [loading, setLoading] = useState(false);
   const [uploadStatus, setUploadStatus] = useState("");
 
-  const renderPage = async (pageNum) => {
-    if (!pdfDoc || renderedPages[pageNum - 1]) return;
-
-    setLoading(true);
-    try {
-      const page = await pdfDoc.getPage(pageNum);
-      const viewport = page.getViewport({ scale: 1.5 });
-      const canvas = document.createElement("canvas");
-      const context = canvas.getContext("2d");
-
-      canvas.width = viewport.width;
-      canvas.height = viewport.height;
-
-      await page.render({ canvasContext: context, viewport }).promise;
-
-      const imgData = canvas.toDataURL("image/png");
-      setRenderedPages((prev) => ({ ...prev, [pageNum - 1]: imgData }));
-      setPageImage(imgData);
-    } catch (error) {
-      console.error("Error rendering page:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
     setCurrentPage(currPage);
   }, [currPage]);
@@ -83,43 +58,77 @@ const PdfViewer = ({ currPage = 1, pdfFile, onPdfProcessed, folderID }) => {
     }
   };
 
+  const renderPage = async (pageNum) => {
+    if (!pdfDoc || renderedPages[pageNum - 1]) return;
+
+    setLoading(true);
+    try {
+      const page = await pdfDoc.getPage(pageNum);
+      const viewport = page.getViewport({ scale: 1.5 });
+      const canvas = document.createElement("canvas");
+      const context = canvas.getContext("2d");
+
+      canvas.width = viewport.width;
+      canvas.height = viewport.height;
+
+      await page.render({ canvasContext: context, viewport }).promise;
+
+      const imgData = canvas.toDataURL("image/png");
+      setRenderedPages((prev) => ({ ...prev, [pageNum - 1]: imgData }));
+      setPageImage(imgData);
+    } catch (error) {
+      console.error("Error rendering page:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const processAllPages = async (pdf) => {
     setLoading(true);
     setUploadStatus("Processing PDF pages...");
-
+    
     try {
       let allPageImages = [];
       let renderedImages = {};
-
+      const uploadedPages = new Set(); // ✅ Track processed pages
+  
       for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+        if (uploadedPages.has(pageNum)) continue; // ✅ Skip if already processed
+  
         setUploadStatus(`Processing page ${pageNum} of ${pdf.numPages}...`);
-
+  
         const page = await pdf.getPage(pageNum);
         const viewport = page.getViewport({ scale: 1.5 });
         const canvas = document.createElement("canvas");
         const context = canvas.getContext("2d");
-
+  
         canvas.width = viewport.width;
         canvas.height = viewport.height;
-
+  
         await page.render({ canvasContext: context, viewport }).promise;
-
-        canvas.toBlob(async (blob) => {
-          const file = new File([blob], `page_${pageNum}.png`, {
+  
+        // ✅ Convert canvas to blob and store in array
+        const imgBlob = await new Promise((resolve) =>
+          canvas.toBlob(resolve, "image/png")
+        );
+  
+        if (imgBlob) {
+          const file = new File([imgBlob], `${folderID}_page_${pageNum}.png`, {
             type: "image/png",
           });
+  
           allPageImages.push({ pageNum, file });
-          renderedImages[pageNum - 1] = URL.createObjectURL(blob);
-
-          if (pageNum === 1) setPageImage(URL.createObjectURL(blob));
-
-          if (allPageImages.length === pdf.numPages) {
-            await uploadImagesToBackend(allPageImages);
-          }
-        }, "image/png");
+          renderedImages[pageNum - 1] = URL.createObjectURL(imgBlob);
+  
+          uploadedPages.add(pageNum); // ✅ Mark as processed
+        }
       }
-
+  
       setRenderedPages(renderedImages);
+  
+      if (allPageImages.length > 0) {
+        await uploadImagesToBackend(allPageImages);
+      }
     } catch (error) {
       console.error("Error processing PDF:", error);
       setUploadStatus("Error processing PDF.");
@@ -127,6 +136,7 @@ const PdfViewer = ({ currPage = 1, pdfFile, onPdfProcessed, folderID }) => {
       setLoading(false);
     }
   };
+  
 
   const uploadImagesToBackend = async (pageImages) => {
     setUploadStatus("Uploading images to server...");
@@ -134,22 +144,28 @@ const PdfViewer = ({ currPage = 1, pdfFile, onPdfProcessed, folderID }) => {
     formData.append("folderID", folderID || "default_folder");
     formData.append("user", user.user_id);
 
-    const uniquePageImages = Array.from(new Map(pageImages.map(obj => [obj.pageNum, obj])).values());
+    const uniquePageImages = Array.from(
+      new Map(pageImages.map((obj) => [obj.pageNum, obj])).values()
+    );
 
     uniquePageImages.forEach(({ pageNum, file }) => {
-        formData.append("images", file, `${folderID}_page_${pageNum}.png`);
+      formData.append("images", file, `${folderID}_page_${pageNum}.png`);
     });
 
     try {
-      const response = await fetch(`http://127.0.0.1:8000/api/createuserslides/${folderID}/`, {
-        method: "POST",
-        body: formData,
-      });
+      const response = await fetch(
+        `http://127.0.0.1:8000/api/createuserslides/${folderID}/`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
 
       if (!response.ok) throw new Error(`Server Error: ${response.status}`);
 
       const data = await response.json();
       setUploadStatus("Upload complete!");
+      window.location.reload();
 
       if (onPdfProcessed) onPdfProcessed(data);
     } catch (error) {
@@ -160,20 +176,6 @@ const PdfViewer = ({ currPage = 1, pdfFile, onPdfProcessed, folderID }) => {
 
   return (
     <div style={{ textAlign: "center", marginTop: "20px" }}>
-      {/* {uploadStatus && (
-        <div style={{ 
-          margin: "10px 0", 
-          padding: "10px", 
-          backgroundColor: uploadStatus.includes("Error") ? "#ffebee" : "#e8f5e9",
-          borderRadius: "5px" 
-        }}>
-          {uploadStatus}
-        </div>
-      )}
-      {loading && !pageImage ? (
-        <p style={{ fontSize: "18px", fontWeight: "bold", marginTop: "20px" }}>Loading...</p>
-      ) : (
-        pageImage && ( */}
       <div
         style={{
           flex: 3,
@@ -198,8 +200,6 @@ const PdfViewer = ({ currPage = 1, pdfFile, onPdfProcessed, folderID }) => {
           }}
         />
       </div>
-      {/* )
-      )} */}
     </div>
   );
 };

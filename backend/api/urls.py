@@ -15,5 +15,6 @@ urlpatterns = [
     path('createuserfolder/<str:pk>/',views.createUserFolder),
     path('upload_frame/',views.imageToText),
     path('createuserslides/<str:pk>/',views.createUserSlides),
+    path('deleteuserfolder/<str:pk>/',views.delete_folder),
     
 ]

@@ -27,6 +27,7 @@ const CreateUserFolder = () => {
             if (response.ok) {
                 setMessage({ type: "success", text: "Folder created successfully!" });
                 setFolderName("");
+                window.location.reload();
             } else {
                 setMessage({ type: "error", text: data.error || "Something went wrong!" });
             }
