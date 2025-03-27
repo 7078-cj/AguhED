@@ -71,7 +71,7 @@ const Presentation = () => {
     gestureSocket.onclose = () => console.log("WebSocket Closed");
   
     return () => gestureSocket.close();
-  }, [pdfFile, hasSlides]);
+  }, []);
 
   const captureFrame = () => {
     if (webcamRef.current) {

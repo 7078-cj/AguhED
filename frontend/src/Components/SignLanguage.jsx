@@ -42,6 +42,9 @@ function SignLanguage({}) {
                   }
                   return {};
                 }
+                else if(data.action == "none"){
+                  return {};
+                }
       
                 return updatedCounts;
               });

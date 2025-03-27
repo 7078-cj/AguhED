@@ -13,37 +13,93 @@ from collections import deque
 
 
 def process_image(self, frame_data):
-    frame_bytes = base64.b64decode(frame_data)
-    np_arr = np.frombuffer(frame_bytes, np.uint8)
-    frame = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
-    frame = cv2.flip(frame, 1)  
-
+    labels_dict = {
+        0: 'Next', 1: 'Previous'
+    }
     
+    # Decode the base64 frame
+    try:
+        frame_bytes = base64.b64decode(frame_data)
+        np_arr = np.frombuffer(frame_bytes, np.uint8)
+        frame = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+        
+    except Exception as e:
+        print(f"Error decoding frame: {e}")
+        return "error"
+
+    if frame is None:
+        return "error"
+
+    frame = cv2.flip(frame, 1)  
     rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    
+    # Process hand landmarks
     result = self.mp_hands.process(rgb_frame)
     
-    gesture = "none"
+    if not result.multi_hand_landmarks:
+        return "None"  # No hand detected
 
-    if result.multi_hand_landmarks:
-        for hand_landmarks in result.multi_hand_landmarks:
-            self.mp_draw.draw_landmarks(frame, hand_landmarks, mp.solutions.hands.HAND_CONNECTIONS)
-            
-            # Get finger position
-            index_finger_tip = hand_landmarks.landmark[8]
-            x, y = int(index_finger_tip.x * frame.shape[1]), int(index_finger_tip.y * frame.shape[0])
+    predicted_action = "None"
+    
+    for hand_landmarks in result.multi_hand_landmarks:
+        self.mp_draw.draw_landmarks(frame, hand_landmarks, mp.solutions.hands.HAND_CONNECTIONS)
+        
+        x_, y_ = [], []
+        data_aux = []
+        
+        for landmark in hand_landmarks.landmark:
+            x_.append(landmark.x)
+            y_.append(landmark.y)
+        
+        min_x, min_y = min(x_), min(y_)
+        
+        for landmark in hand_landmarks.landmark:
+            data_aux.append(landmark.x - min_x)
+            data_aux.append(landmark.y - min_y)
+        
+        # Check if hand is open or closed
+        index_tip = hand_landmarks.landmark[8].y
+        middle_tip = hand_landmarks.landmark[12].y
+        ring_tip = hand_landmarks.landmark[16].y
+        pinky_tip = hand_landmarks.landmark[20].y
+        thumb_tip = hand_landmarks.landmark[4].x  # X-coordinate for thumb
 
-            # Get current gesture self.model.predict(features)[0]
-            current_gesture = self.model.predict(hand_landmarks.landmark)
-            print("Detected Gesture:", current_gesture)
+        index_mcp = hand_landmarks.landmark[5].y
+        middle_mcp = hand_landmarks.landmark[9].y
+        ring_mcp = hand_landmarks.landmark[13].y
+        pinky_mcp = hand_landmarks.landmark[17].y
+        thumb_ip = hand_landmarks.landmark[3].x  # X-coordinate for thumb base
 
-            # State transition logic
-            if current_gesture in ["Next", "Previous"] and self.gesture_state != current_gesture:
-                gesture = current_gesture
-                self.gesture_state = current_gesture
-            elif current_gesture != self.gesture_state:
-                self.gesture_state = current_gesture
+        is_closed = (
+            index_tip > index_mcp and 
+            middle_tip > middle_mcp and 
+            ring_tip > ring_mcp and 
+            pinky_tip > pinky_mcp and
+            abs(thumb_tip - thumb_ip) < 0.02  # Thumb should be close to the base
+        )
 
-    return gesture
+        if is_closed:
+            return "None"
+
+        # Maintain sequence buffer
+        self.sequence_buffer.append(data_aux)
+        if len(self.sequence_buffer) > self.SEQUENCE_LENGTH:
+            self.sequence_buffer.pop(0)
+        
+        # Make prediction when sequence is ready
+        if len(self.sequence_buffer) == self.SEQUENCE_LENGTH:
+            try:
+                features = np.array([data_aux])  # Static model input
+                # For sequence models: features = np.array([self.sequence_buffer])
+                
+                action = self.model.predict(features)[0]
+                predicted_action = labels_dict.get(int(action), "unknown")
+                print(f"Predicted: {predicted_action }")
+            except Exception as e:
+                print(f"Prediction error: {e}")
+                return "error"
+        
+    return predicted_action
 
 import base64
 import numpy as np
@@ -85,10 +141,6 @@ def process_signLanguage(self, frame_data):
     for hand_landmarks in result.multi_hand_landmarks:
         self.mp_draw.draw_landmarks(frame, hand_landmarks, mp.solutions.hands.HAND_CONNECTIONS)
         
-        # Check for navigation gestures first
-        
-        
-        # Collect normalized hand landmark coordinates
         x_, y_ = [], []
         data_aux = []
         

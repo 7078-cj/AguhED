@@ -11,7 +11,7 @@ import threading
 import time  
 from channels.generic.websocket import AsyncWebsocketConsumer
 from .KalmanFilter import KalmanFilter
-from .utils import get_gesture, process_image, process_signLanguage
+from .utils import process_image, process_signLanguage
 from collections import deque
 import pickle
 import os
@@ -23,6 +23,8 @@ class VideoConsumer(AsyncWebsocketConsumer):
         self.mp_draw = mp.solutions.drawing_utils
         self.gesture_state = "None"
         self.gesture_cooldown = 0
+        self.SEQUENCE_LENGTH = 30
+        self.sequence_buffer = deque(maxlen=self.SEQUENCE_LENGTH)
         model_path = os.path.join(os.path.dirname(__file__), "Gesturemodel.pickle")
         with open(model_path, 'rb') as f:
             self.model = pickle.load(f) 
