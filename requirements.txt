@@ -67,7 +67,6 @@ packaging==24.2
 pillow==11.1.0
 prompt_toolkit==3.0.50
 proto-plus==1.26.1
-protobuf==5.29.4
 pyasn1==0.6.1
 pyasn1_modules==0.4.1
 pycparser==2.22
@@ -104,3 +103,4 @@ vine==5.1.0
 wcwidth==0.2.13
 websockets==15.0.1
 zope.interface==7.2
+protobuf==5.29.4

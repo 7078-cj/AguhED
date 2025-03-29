@@ -27,7 +27,10 @@ class VideoConsumer(AsyncWebsocketConsumer):
         self.sequence_buffer = deque(maxlen=self.SEQUENCE_LENGTH)
         model_path = os.path.join(os.path.dirname(__file__), "Gesturemodel.pickle")
         with open(model_path, 'rb') as f:
-            self.model = pickle.load(f) 
+            self.model = pickle.load(f)
+        if self.model:
+             await self.send(text_data=json.dumps({"modelReady": "true"}))
+             print("ready")
         
 
     async def disconnect(self, code):
@@ -38,7 +41,7 @@ class VideoConsumer(AsyncWebsocketConsumer):
 
         if data["type"] == "image":
             frame_data = data["image"]
-            asyncio.create_task(self.process_and_send(frame_data))
+            await self.process_and_send(frame_data)
             
     async def process_and_send(self, frame_data):
         action = process_image(self, frame_data)
@@ -80,7 +83,7 @@ class SignLanguageConsumer(AsyncWebsocketConsumer):
 
         if data["type"] == "image":
             frame_data = data["image"]
-            asyncio.create_task(self.process_and_send(frame_data))
+            await self.process_and_send(frame_data)
             
     async def process_and_send(self, frame_data):
         action = process_signLanguage(self, frame_data)

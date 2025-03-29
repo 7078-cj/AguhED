@@ -36,33 +36,7 @@ function Home() {
 
 
 
-const handleDelete = async (folderId) => {
-  const apiUrl = `http://localhost:8000/api/deleteuserfolder/${folderId}/`;
 
-  try {
-    const response = await fetch(apiUrl, {
-      method: "DELETE",
-    });
-
-    if (!response.ok) {
-      throw new Error("Failed to delete folder");
-    }
-
-  
-
-    // Optionally, update state to remove folder from UI
-    setFolders((prevFolders) => prevFolders.filter(folder => folder.id !== folderId));
-  } catch (error) {
-    console.error("Error deleting folder:", error);
-
-    // Show error notification
-    showNotification({
-      title: "Error",
-      message: "Failed to delete folder",
-      color: "red",
-    });
-  }
-};
 
 
   return (

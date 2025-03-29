@@ -38,6 +38,13 @@ const Presentation = () => {
   const [Gesture, setGesture] = useState(true);
   const lastActionRef = useRef(null);
   const [hasSlides, setHasSlides] = useState(true); 
+  const [mode, setMode] = useState("gestures");
+  const [imageTextCaption, setImageTextCaption] = useState("");
+  const [showImageTextCaption, setShowImageTextCaption] = useState(false);
+  const [modelReady, setModelReady] = useState(false);
+  
+  const location = useLocation();
+  
 
   const handleSlidesCheck = (status) => {
     setHasSlides(status);
@@ -48,37 +55,41 @@ const Presentation = () => {
   };
 
   useEffect(() => {
+
+    if (mode !== "gestures") return;
+
     const gestureSocket = new WebSocket("ws://127.0.0.1:8000/ws/video");
     setGestureWs(gestureSocket);
   
     gestureSocket.onmessage = (event) => {
       const data = JSON.parse(event.data);
+      if (data.modelReady === "true"){ 
+          setModelReady(true)
+         console.log("ready")};
   
-      if (data.type === "image") {
-        setProcessedFrame(`data:image/jpeg;base64,${data.image}`);
-      }
-  
-      if (pdfFile || hasSlides) {  // Fix: Ensure slides/PDF exist before using gestures
-        if (data.action && data.action !== lastActionRef.current) {
-          console.log("Gesture detected:", data.action);
-          if (data.action === "Next") {
-            setCurrentPage((prev) => prev + 1);
-          } else if (data.action === "Previous") {
-            setCurrentPage((prev) => Math.max(0, prev - 1));
+        if (pdfFile || hasSlides) { 
+          if (data.action && data.action !== lastActionRef.current) {
+            console.log("Gesture detected:", data.action);
+            if (data.action === "Next") {
+              setCurrentPage((prev) => prev + 1);
+            } else if (data.action === "Previous") {
+              setCurrentPage((prev) => Math.max(0, prev - 1));
+            }
+            lastActionRef.current = data.action;
           }
-          lastActionRef.current = data.action;
         }
-      }
     };
   
     gestureSocket.onerror = (error) => console.error("WebSocket Error:", error);
     gestureSocket.onclose = () => console.log("WebSocket Closed");
   
-    return () => gestureSocket.close();
-  }, []);
+    return () => {
+      gestureSocket.close();
+    };
+  }, [mode]);
 
   const captureFrame = () => {
-    if (webcamRef.current) {
+    if (webcamRef.current && modelReady == true) {
       const imageSrc = webcamRef.current.getScreenshot();
       if (gestureWS && gestureWS.readyState === WebSocket.OPEN) {
         gestureWS.send(
@@ -90,8 +101,12 @@ const Presentation = () => {
 
   useEffect(() => {
     if (!gestureWS) return;
-    const interval = setInterval(captureFrame, 100);
-    return () => clearInterval(interval);
+    if(modelReady){
+      const interval = setInterval(captureFrame, 100);
+      return () => clearInterval(interval);
+    }
+    
+   
   }, [gestureWS]);
 
   const handleFileUpload = (event) => {
@@ -107,55 +122,44 @@ const Presentation = () => {
     setCurrentPage(0);
   };
 
-  const processImage = async ({language}) => {
+  const processImage = async (language) => {  
     if (webcamRef.current) {
       const imageSrc = webcamRef.current.getScreenshot();
-      if (imageSrc) {
-        const byteCharacters = atob(imageSrc.split(",")[1]);
-        const byteNumbers = new Array(byteCharacters.length);
-        for (let i = 0; i < byteCharacters.length; i++) {
-          byteNumbers[i] = byteCharacters.charCodeAt(i);
-        }
-        const byteArray = new Uint8Array(byteNumbers);
-        const blob = new Blob([byteArray], { type: "image/png" });
-
-        const formData = new FormData();
-        formData.append("image", blob, "snapshot.png");
-        formData.append("language", language);
-
-        const response = await fetch("http://127.0.0.1:8000/api/upload_frame/", {
-          method: "POST",
-          body: formData,
-        });
-
-        const result = await response.json();
-        setImageTextCaption(result.text || "No text detected");
-        setShowImageTextCaption(true);
-        setTimeout(() => setShowImageTextCaption(false), 10000);
-      } else {
+      if (!imageSrc) {
         console.error("Failed to capture image from webcam.");
+        return;
+      }
+  
+      const byteCharacters = atob(imageSrc.split(",")[1]);
+      const byteNumbers = Array.from(byteCharacters, (char) => char.charCodeAt(0));
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: "image/png" });
+  
+      const formData = new FormData();
+      formData.append("image", blob, "snapshot.png");
+      formData.append("language", language);
+  
+      try {
+        setImageTextCaption("Loading...");
+        const response = await fetch("http://127.0.0.1:8000/api/upload_frame/", { method: "POST", body: formData });
+        const result = await response.json();
+        setImageTextCaption(result.Response || "No text detected");
+        setShowImageTextCaption(true);
+        setTimeout(() => setShowImageTextCaption(false), 5000);
+      } catch (error) {
+        console.error("Error processing image:", error);
       }
     }
   };
-  
 
-  const [mode, setMode] = useState("gestures");
-  const [imageTextCaption, setImageTextCaption] = useState("");
-  const [showImageTextCaption, setShowImageTextCaption] = useState(false);
   
-  const location = useLocation();
-  const fileId = location.state?.fileId;
 
   useEffect(() => {
-    let timer;
-    if (showImageTextCaption) {
-      timer = setTimeout(() => {
-        setShowImageTextCaption(false);
-      }, 10000);
-    }
-    return () => clearTimeout(timer);
-  }, [showImageTextCaption]);
-
+    if (!gestureWS || !modelReady || gestureWS.readyState !== WebSocket.OPEN) return;
+  
+    const interval = setInterval(captureFrame, 100);
+    return () => clearInterval(interval);
+  }, [gestureWS, modelReady]);
 
   return (
     <div className="meet-container">
@@ -272,14 +276,15 @@ const Presentation = () => {
                 className={`control-button ${mode !== "off" ? "active" : ""}`}
                 data-mode={mode}
                 onClick={() => {
+                  if (gestureWS) {
+                    gestureWS.close();  
+                    setGestureWs(null);
+                  }
+                
                   if (mode === "gestures") {
                     setMode("signLanguage");
                     setGesture(false);
                   } else if (mode === "signLanguage") {
-                    setMode("gestures");
-                    setGesture(true);
-                    
-                  } else {
                     setMode("gestures");
                     setGesture(true);
                   }
