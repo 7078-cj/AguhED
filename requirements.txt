@@ -33,18 +33,16 @@ eventlet==0.39.1
 flatbuffers==25.2.10
 fonttools==4.56.0
 google==3.0.0
-google-ai-generativelanguage==0.6.15
-google-api-core==2.24.2
+
+
 google-api-python-client==2.165.0
 google-auth==2.38.0
 google-auth-httplib2==0.2.0
 google-genai==1.7.0
-google-generativeai==0.8.4
-googleapis-common-protos==1.69.2
+
 greenlet==3.1.1
 grpcio==1.71.0
-grpcio-status==1.71.0
-h11==0.14.0
+
 httpcore==1.0.7
 httplib2==0.22.0
 httpx==0.28.1
@@ -58,7 +56,6 @@ kiwisolver==1.4.8
 kombu==5.4.2
 matplotlib==3.10.1
 mediapipe==0.10.21
-ml_dtypes==0.5.1
 numpy==1.26.4
 opencv-contrib-python==4.11.0.86
 opencv-python==4.11.0.86
@@ -67,6 +64,7 @@ packaging==24.2
 pillow==11.1.0
 prompt_toolkit==3.0.50
 proto-plus==1.26.1
+
 pyasn1==0.6.1
 pyasn1_modules==0.4.1
 pycparser==2.22
@@ -103,4 +101,3 @@ vine==5.1.0
 wcwidth==0.2.13
 websockets==15.0.1
 zope.interface==7.2
-protobuf==5.29.4
