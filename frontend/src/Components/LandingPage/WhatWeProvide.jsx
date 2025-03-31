@@ -1,5 +1,5 @@
 import { Card, Container, SimpleGrid, Text, Title } from "@mantine/core";
-import { IconHandFinger, IconLanguage, IconBrain } from '@tabler/icons-react';
+import { IconHandFinger, IconLanguage, IconBrain } from "@tabler/icons-react";
 import classes from "../../css/LandingPage/FeaturesCards.module.css";
 
 const mockdata = [
@@ -23,15 +23,15 @@ const mockdata = [
   },
 ];
 
-function FeaturesCards() {
+function WhatWeProvide() {
   const features = mockdata.map((feature) => (
     <Card key={feature.title} className={classes.card} padding="xl">
       <div className={classes.iconWrapper}>
-        <feature.icon 
-          size={40} 
-          stroke={1.5} 
+        <feature.icon
+          size={40}
+          stroke={1.5}
           color="#FFFFFF"
-          style={{ width: '40px', height: '40px' }}
+          style={{ width: "40px", height: "40px" }}
         />
       </div>
       <Text className={classes.cardTitle}>{feature.title}</Text>
@@ -51,4 +51,4 @@ function FeaturesCards() {
   );
 }
 
-export default FeaturesCards;
+export default WhatWeProvide;

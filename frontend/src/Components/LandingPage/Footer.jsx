@@ -4,7 +4,7 @@ import {
   IconBrandYoutube,
   IconBrandGithub,
 } from "@tabler/icons-react";
-import { ActionIcon, Anchor, Group, Container, Text } from "@mantine/core";
+import { ActionIcon, Group, Container, Text } from "@mantine/core";
 import classes from "../../css/LandingPage/FooterCentered.module.css";
 
 const socialLinks = [

@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import Webcam from "react-webcam";
+import "../css/Presentation/SignLanguage.css";
+
 
 function SignLanguage() {
   const [gestureWS, setGestureWs] = useState(null);
@@ -85,7 +87,7 @@ function SignLanguage() {
   return (
     <div className="app-container">
       {/* Right Panel - Webcam */}
-      <div className="right-panel-compact pt-10">
+      <div className="right-panel-compact">
         <div className="video-container-small">
           <Webcam
             ref={webcamRef}
@@ -93,8 +95,8 @@ function SignLanguage() {
             width={380}
             height={260}
             videoConstraints={{
-              width: 320,
-              height: 240,
+              width: 380,
+              height: 260,
               facingMode: "user",
             }}
           />
@@ -111,8 +113,8 @@ function SignLanguage() {
       {/* Fullscreen Slide Content */}
       <div
         style={{
-          width: "100vw",
-          height: "100vh",
+          width: "100%",
+          height: "100%",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",

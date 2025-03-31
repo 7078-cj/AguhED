@@ -1,26 +1,14 @@
 import React, { useState, useEffect } from "react";
-import {
-  Anchor,
-  Box,
-  Burger,
-  Button,
-  Container,
-  Drawer,
-  Flex,
-  Group,
-  Modal,
-  ScrollArea,
-  Title,
-} from "@mantine/core";
+import { Box, Burger, Button, Drawer, Group, ScrollArea } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import Logo from "../../assets/logo.svg";
+import Logo from "../../assets/Logo.png";
 import classes from "../../css/LandingPage/HeaderMegaMenu.module.css";
 import LoginModal from "../Modals/LoginModal";
 import SignupModal from "../Modals/SignupModal";
 
-
 function Navbar() {
-  const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] = useDisclosure(false);
+  const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] =
+    useDisclosure(false);
   const [loginModalOpened, setLoginModalOpened] = useState(false);
   const [signupModalOpened, setSignupModalOpened] = useState(false);
   const [activeSection, setActiveSection] = useState("home");
@@ -31,6 +19,13 @@ function Navbar() {
     { id: "services", label: "Services" },
     { id: "about", label: "About" },
   ];
+
+  const scrollToSection = (sectionId) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth" });
+    }
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -56,25 +51,20 @@ function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const scrollToSection = (sectionId) => {
-    const element = document.getElementById(sectionId);
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth" });
-    }
-  };
-
   return (
     <Box>
       <header className={classes.header}>
         <Group justify="space-between" h="100%">
-          <img src={Logo} alt="logo" />
+        <p className={classes.logo} > AguhEd</p>
 
           <Group h="100%" gap={0} visibleFrom="sm">
             {sections.map(({ id, label }) => (
               <a
                 key={id}
                 href={`#${id}`}
-                className={`${classes.link} ${activeSection === id ? classes.active : ""}`}
+                className={`${classes.link} ${
+                  activeSection === id ? classes.active : ""
+                }`}
                 onClick={(e) => {
                   e.preventDefault();
                   scrollToSection(id);
@@ -108,18 +98,36 @@ function Navbar() {
             </Button>
           </Group>
 
-          <Burger opened={drawerOpened} onClick={toggleDrawer} hiddenFrom="sm" />
+          <Burger
+            opened={drawerOpened}
+            onClick={toggleDrawer}
+            hiddenFrom="sm"
+          />
         </Group>
       </header>
 
       {/* Login Modal */}
-      <LoginModal opened={loginModalOpened} onClose={() => setLoginModalOpened(false)} />
+      <LoginModal
+        opened={loginModalOpened}
+        onClose={() => setLoginModalOpened(false)}
+      />
 
       {/* Signup Modal */}
-      <SignupModal opened={signupModalOpened} onClose={() => setSignupModalOpened(false)} />
+      <SignupModal
+        opened={signupModalOpened}
+        onClose={() => setSignupModalOpened(false)}
+      />
 
       {/* Drawer for Mobile Navigation */}
-      <Drawer opened={drawerOpened} onClose={closeDrawer} size="100%" padding="md" title="Navigation" hiddenFrom="sm" zIndex={1000000}>
+      <Drawer
+        opened={drawerOpened}
+        onClose={closeDrawer}
+        size="100%"
+        padding="md"
+        title="Navigation"
+        hiddenFrom="sm"
+        zIndex={1000000}
+      >
         <ScrollArea h="calc(100vh - 80px" mx="-md">
           {sections.map(({ id, label }) => (
             <a key={id} href={`#${id}`} className={classes.link}>

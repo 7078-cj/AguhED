@@ -175,11 +175,11 @@ const PdfViewer = ({ currPage = 1, pdfFile, onPdfProcessed, folderID }) => {
   };
 
   return (
-    <div style={{ textAlign: "center", marginTop: "20px" }}>
+    <div style={{ textAlign: "center"}}>
       <div
         style={{
           flex: 3,
-          height: "100%",
+          height: "90%",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",

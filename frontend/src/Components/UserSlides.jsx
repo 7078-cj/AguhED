@@ -53,8 +53,8 @@ const UserSlides = ({ onSlidesCheck, currPage, folderID, onPageChange }) => {
   return (
     <div
       style={{
-        width: "100vw",
-        height: "100vh",
+        width: "100%",
+        height: "100%",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -85,7 +85,7 @@ const UserSlides = ({ onSlidesCheck, currPage, folderID, onPageChange }) => {
               alt={`Slide ${currentIndex + 1}`}
               style={{
                 width: "100%",
-                maxHeight: "90vh",
+                maxHeight: "80vh",
                 objectFit: "contain",
               }}
             />
@@ -95,7 +95,7 @@ const UserSlides = ({ onSlidesCheck, currPage, folderID, onPageChange }) => {
           <p
             style={{
               position: "absolute",
-              top: "20px",
+              top: "10%",
               left: "50%",
               transform: "translateX(-50%)",
               color: "#fff",
@@ -110,13 +110,12 @@ const UserSlides = ({ onSlidesCheck, currPage, folderID, onPageChange }) => {
           </p>
 
           {/* Navigation Buttons */}
-          <button
+          {/* <button
             onClick={handlePrev}
             disabled={currentIndex === 0}
             style={{
               position: "absolute",
               left: "20px",
-              bottom: "20px",
               backgroundColor: currentIndex === 0 ? "#aaa" : "#ccc",
               padding: "12px 20px",
               borderRadius: "8px",
@@ -131,7 +130,7 @@ const UserSlides = ({ onSlidesCheck, currPage, folderID, onPageChange }) => {
             style={{
               position: "absolute",
               right: "20px",
-              bottom: "20px",
+              // bottom: "20px",
               backgroundColor: currentIndex >= slides.length - 1 ? "#aaa" : "#007bff",
               color: "#fff",
               padding: "12px 20px",
@@ -141,7 +140,7 @@ const UserSlides = ({ onSlidesCheck, currPage, folderID, onPageChange }) => {
             }}
           >
             Next
-          </button>
+          </button> */}
         </div>
       ) : (
         !loading && <p className="text-gray-500 text-center">No slides available.</p>

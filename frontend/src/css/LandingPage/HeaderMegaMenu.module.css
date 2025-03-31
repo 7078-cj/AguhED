@@ -12,13 +12,10 @@
 }
 
 .logo {
-  height: 40px;
+  font-weight: bold;
+  font-size: 30px;
+  height: auto;
   width: auto;
-  transition: transform 0.2s ease;
-
-  &:hover {
-    transform: scale(1.05);
-  }
 }
 
 .link {
@@ -27,7 +24,7 @@
   height: 100%;
   padding: 0 20px;
   text-decoration: none;
-  color: #6CA5C0;
+  color: #6ca5c0;
   font-weight: 500;
   font-size: 16px;
   transition: all 0.3s ease;
@@ -42,7 +39,7 @@
   left: 50%;
   width: 0;
   height: 3px;
-  background: linear-gradient(90deg, #34505e, #6CA5C0);
+  background: linear-gradient(90deg, #34505e, #6ca5c0);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   transform: translateX(-50%);
   border-radius: 4px 4px 0 0;
@@ -62,7 +59,7 @@
 
 .loginButton {
   position: relative;
-  color: #6CA5C0;
+  color: #6ca5c0;
   font-weight: 500;
   padding: 8px 24px;
   overflow: hidden;
@@ -98,7 +95,7 @@
   z-index: 1;
 }
 .burger {
-  color: #6CA5C0;
+  color: #6ca5c0;
 }
 
 @media (max-width: $mantine-breakpoint-sm) {
@@ -118,7 +115,11 @@
 }
 
 .modalContent {
-  background: linear-gradient(145deg, rgba(10, 25, 47, 0.98), rgba(16, 31, 53, 0.98));
+  background: linear-gradient(
+    145deg,
+    rgba(10, 25, 47, 0.98),
+    rgba(16, 31, 53, 0.98)
+  );
   backdrop-filter: blur(16px);
   border: none;
   border-radius: 8px;
@@ -135,7 +136,6 @@
   background: rgba(16, 31, 53, 0.5);
   padding: 40px;
   border: none;
-
 }
 
 .input {

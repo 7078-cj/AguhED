@@ -1,106 +1,104 @@
-
-.container {
-  background-color: #161b1b;
-  min-height: 100vh;
-}
-
-.content {
-  padding: 40px;
-  max-width: 1400px;
-  margin: 0 auto;
-  padding-top: 100px;
-  perspective: 1000px;
-}
-  
-  .card {
-  background: #274d606c;
-  backdrop-filter: blur(10px);
+.folderCard {
+  background-color: #2C2E33;
   border: 1px solid rgba(12, 149, 155, 0.2);
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  overflow: hidden;
-  transform-style: preserve-3d;
+  transition: all 0.3s ease;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
-  
-  .card:hover {
-  transform: translateY(-5px) scale(1.02) rotateX(2deg);
-  box-shadow: 0 12px 24px rgba(12, 149, 155, 0.2);
+
+.folderCard:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(12, 149, 155, 0.15);
   border-color: #0C959B;
 }
 
-.card:hover::before {
-  opacity: 1;
-}
-
-.card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(45deg, rgba(12, 149, 155, 0.1), transparent);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-  
-  .cardHeader {
+.cardHeader {
+  background-color: rgba(12, 149, 155, 0.05);
+  padding: 16px;
   border-bottom: 1px solid rgba(12, 149, 155, 0.2);
-  background-color: rgba(12, 149, 155, 0.08);
-  backdrop-filter: blur(5px);
-  padding: 1.5rem;
 }
-  
-  .dateText {
+
+.headerContent {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.folderIcon {
   color: #0C959B;
-  font-weight: 500;
-  letter-spacing: 0.5px;
-  opacity: 0.9;
 }
-  
-  .fileName {
+
+.fileName {
   color: #e8eaed;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-  margin: 1rem 0 0.5rem;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
-  
-  .fileSize {
-  color: #0C959B;
-  font-size: 0.9rem;
-  opacity: 0.8;
-  letter-spacing: 0.3px;
+
+.deleteButton {
+  background: none;
+  border: none;
+  color: #ff6b6b;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: all 0.2s;
 }
-  
-  .openButton {
+
+.deleteButton:hover {
+  background-color: rgba(255, 107, 107, 0.1);
+  transform: scale(1.1);
+}
+
+.cardContent {
+  padding: 16px;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.filePreview {
+  flex-grow: 1;
+  margin-bottom: 16px;
+}
+
+.fileItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.fileItem:last-child {
+  border-bottom: none;
+}
+
+.pdfIcon {
+  color: #FF4136;
+  font-size: 18px;
+}
+
+.fileText {
+  color: #e8eaed;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.emptyText {
+  text-align: center;
+  padding: 16px 0;
+}
+
+.openButton {
   border-color: #0C959B;
   color: #0C959B;
-  background: rgba(12, 149, 155, 0.05);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  backdrop-filter: blur(2px);
+  margin-top: auto;
 }
-  
-  .openButton:hover {
-  background-color: rgba(12, 149, 155, 0.15);
+
+.openButton:hover {
+  background-color: rgba(12, 149, 155, 0.1);
   transform: scale(1.02);
-  box-shadow: 0 4px 12px rgba(12, 149, 155, 0.2);
-  text-shadow: 0 0 8px rgba(12, 149, 155, 0.3);
 }
-
-
-  @keyframes pulse {
-    0% {
-      transform: scale(1);
-      opacity: 0.8;
-    }
-    50% {
-      transform: scale(1.1);
-      opacity: 1;
-    }
-    100% {
-      transform: scale(1);
-      opacity: 0.8;
-    }
-  }

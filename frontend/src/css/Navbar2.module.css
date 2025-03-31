@@ -1,8 +1,8 @@
 .navbar {
- display: grid;
+  display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  padding: 0.8rem 4rem;
+  padding: 0.8rem 15rem;
   background: rgba(10, 25, 47, 0.95);
   height: 70px;
   position: fixed;
@@ -22,7 +22,9 @@
 }
 
 .logo {
-  height: 35px;
+  font-weight: bold;
+  font-size: 30px;
+  height: auto;
   width: auto;
 }
 
@@ -107,7 +109,7 @@
 }
 
 .active::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -117,19 +119,19 @@
 }
 
 .active::after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: 0;
   left: 50%;
   width: 30px;
   height: 2px;
-  background-color: #0C959B;
+  background-color: #0c959b;
   transform: translateX(-50%);
   box-shadow: 0 0 8px rgba(12, 149, 155, 0.4);
 }
 
 .active span {
-  background: linear-gradient(120deg, #0C959B, #0fb4bb);
+  background: linear-gradient(120deg, #0c959b, #0fb4bb);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   font-weight: 500;

@@ -3,11 +3,10 @@ import {
   Button,
   Container,
   Text,
-  Anchor,
   Group,
 } from "@mantine/core";
-import classes from "../../css/LandingPage/HeroTitle.module.css";
 import { useNavigate } from "react-router-dom";
+import classes from "../../css/LandingPage/HeroTitle.module.css";
 import AuthContext from "../../Context/AuthContext";
 import LoginModal from "../Modals/LoginModal";
 import SignupModal from "../Modals/SignupModal";

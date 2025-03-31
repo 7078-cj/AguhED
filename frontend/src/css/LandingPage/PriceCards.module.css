@@ -74,6 +74,12 @@
   color: #1a1b1e;
   font-size: 28px;
   font-weight: 700;
+  /* margin-bottom: 5px; */
+}
+.planSubtitle{
+  color: #737475;
+  font-size: 15px;
+  font-weight: 100;
   margin-bottom: 10px;
 }
 .planPrice {
