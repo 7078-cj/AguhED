@@ -41,6 +41,7 @@ const Presentation = () => {
   const [imageTextCaption, setImageTextCaption] = useState("");
   const [showImageTextCaption, setShowImageTextCaption] = useState(false);
   const [modelReady, setModelReady] = useState(false);
+  
 
   const location = useLocation();
 
@@ -68,15 +69,18 @@ const Presentation = () => {
       if (pdfFile || hasSlides) {
         if (data.action && data.action !== lastActionRef.current) {
           console.log("Gesture detected:", data.action);
+          
           if (data.action === "Next") {
             setCurrentPage((prev) => prev + 1);
           } else if (data.action === "Previous") {
             setCurrentPage((prev) => Math.max(0, prev - 1));
           }
+          
           lastActionRef.current = data.action;
         }
       }
     };
+    
 
     gestureSocket.onerror = (error) => console.error("WebSocket Error:", error);
     gestureSocket.onclose = () => console.log("WebSocket Closed");

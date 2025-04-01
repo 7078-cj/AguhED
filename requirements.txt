@@ -33,8 +33,7 @@ eventlet==0.39.1
 flatbuffers==25.2.10
 fonttools==4.56.0
 google==3.0.0
-
-
+google-generativeai
 google-api-python-client==2.165.0
 google-auth==2.38.0
 google-auth-httplib2==0.2.0
@@ -101,3 +100,6 @@ vine==5.1.0
 wcwidth==0.2.13
 websockets==15.0.1
 zope.interface==7.2
+vercel
+gunicorn
+vercel-wsgi
